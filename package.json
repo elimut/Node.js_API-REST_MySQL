@@ -1,0 +1,17 @@
+{
+  "name": "node.js_api-rest_mysql",
+  "version": "1.0.0",
+  "description": "Easily expand your Node.JS Rest API from an empty folder, with Node.JS, Express.js and MySQL.",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "author": "Vandingenen",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}
