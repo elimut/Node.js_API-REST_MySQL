@@ -240,7 +240,7 @@ Module js et récupération avec un point de terminaison:
 ## Les réponses Json
 
 Rappel:
-rôle d'une API REST => intercepter une requête http, puis retourner une réponse contenant les informations demandées par le client au format**JSON**.
+rôle d'une API REST => intercepter une requête http, puis retourner une réponse contenant les informations demandées par le client au format **JSON**.
 Mais la requête HTTP est elle valide, car pour le moment l'on ne renvoie que des chaînes de caractères avec res.send().
 
 ![API](img/API_Json.png)
