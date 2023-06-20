@@ -21,10 +21,13 @@ app.get('/api/pokemons/:id', (req, res) => {
     // res.send(`Vous avez demandé le pokemon n° ${id}`); = message indiquant l'id choisi
     const pokemon = pokemons.find(pokemon => pokemon.id === id);
     // constante qui permet de récupèrer dans le fichier pokemon l'objet choisi grâce à l'id
-    res.send(`Vous avez choisi: ${pokemon.name}`);
+    // res.send(`Vous avez choisi: ${pokemon.name}`);
     // message envoyé: nom du pokemon, nam dans objet pokemon suite à la sélection de l'id.
     // message erreur name undefined, méthode find ne renvoie rien.
     // Routeur d'express passe les paramètres sous forme de chaînes de caractères systématiquement, le paramètre id devient une chaîne de caractère => pokemon.id === id => comparaison de deux valeurs non identiques => false, il faut convertir la chaîne de caractère en un nombre => méthode js native parse int
+    res.json(pokemon);
+    // on place dans le corps de la réponse http, un objet js = pokemon
+    // retour d'une réponse http grâce à res au format json avec la méthode json(), renvoie d'info grâce à la var pokemon
 });
 // appel nouvelle route dans navigateur => localhost:3000/api/pokemon/1
 // nouvel endpoint dans l'API

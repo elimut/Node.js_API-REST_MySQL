@@ -176,7 +176,7 @@ Il s'occupe d'exécuter le projet Node.js en tâche de fond, à chaque modificat
 
 #### Installation nodemon
 
-**npm install nodemon --save-dev => il existe deux types de dépendances: dépendances du projet dans dependencies, --save et dependencies du projet pendant le développement, devDependencies, comme nodemon.Une fois l'application déployée, elle n'aura pas à être relancée.**
+**npm install nodemon --save -dev => il existe deux types de dépendances: dépendances du projet dans dependencies, --save et dependencies du projet pendant le développement, devDependencies, comme nodemon.Une fois l'application déployée, elle n'aura pas à être relancée.**
 
 Il faut mettre à jour le script de démarrage: nodemon app.js.
 
@@ -198,7 +198,7 @@ retour réponse client.
 Implémenter nouvelle route:
 
     app.get('/api/pokemon/1', (req, res) => res.send("Hello Bulbizar"));
-    // appel nouvelle route dans navigateur => localhost:3000/api/pokemon/1
+    // appel nouvelle route dans navigateur => localhost:3000/api/pokemons/1
     = nouvel endpoint dans API REST
 
 ### Passer un paramètre depuis l'URL
@@ -243,12 +243,44 @@ Rappel:
 rôle d'une API REST => intercepter une requête http, puis retourner une réponse contenant les informations demandées par le client au format **JSON**.
 Mais la requête HTTP est elle valide, car pour le moment l'on ne renvoie que des chaînes de caractères avec res.send().
 
-![API](img/API_Json.png)
+![API](img/API_Json.png)s
 
 Renvoie d'une vraie réponse HTTP, les différents éléments nécessaires pour retourner une vraie réponse HTTP:
 - les **données**: sont elles bien retournées?
-- **format JSON**: données doivent être au format JSON
-- **le type mime**: il est nécessaire d'indiquer un type mime lorsque l'on utilise le protocole HTTP.
+- **format JSON**: données doivent être au format JSON,
+- **le type mime**: il est nécessaire d'indiquer un type mime lorsque l'on utilise le protocole HTTP. Ajout sous forme d'une entête à la réponse HTTP,
+  Demande d'une simple page via le navigateur => type Mime est ajouté.
+- **le code de statut**: code à 3 chiffres indiquant le statut de la réponse, non présent dans la requête HTTP mais seulement dans la réponse ex: 200 ok 404).
+
+  Dans le cas d'une réponse JSON, le type Mime est = Content-Type: application/json.
+  Page web simple: Content-Type: text/html
+
+### Retourner une réponse au format JSON
+
+La conversion de nos réponses au format JSON se fait en 2 étapes:
+- convertir le corps de la réponse en JSON plutôt que des chaînes de caractères,
+- Ajouter un type MIME dans la réponse http pour indiquer que cette réponse contient du JSON.
+=>
+**Express permet cela grâce à une méthode: res.json().** Elle prend en charge le retour au format Json et le type Mime application.json.
+
+### Embellir la réponse du navigateur
+
+Renvoie réponse au format json, ce sont des applications donc du code qui vont consommer les réponses de notre API REST, mais la réponse peut être illisible pour nous en phase de développement ou debbug.
+La plupart des navigateurs récents permettent d'obtenir une extension pour améliorer l'affichage des réponses au format JSON:
+**Chrome: JSON viewer**.
+
+### Organiser la structure des réponses
+
+La réponse est-elle complète?
+exemple, retour des données, les infos sont bonnes mais à la place des développeurs front end qui consomment l'API REST, il faut confirmer que tout c'est bien déroulé ou erreurs.
+Il vaut mieux être trop précis avec une API REST.
+
+Création fichier helper.js.
+
+
+
+
+
 
 
 
