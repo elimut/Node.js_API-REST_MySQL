@@ -277,11 +277,32 @@ Il vaut mieux être trop précis avec une API REST.
 
 Création fichier helper.js.
 
+    exports.success = (message, data) => {
+        return {
+            message: message,
+            data
+        }
+    }
+    // méthode success avec deux param pour construire une réponse
+    // export
+    // il existe une syntaxe d' ecma 6 permettant de fusionner la prropriété et la valeur d'un objet js s'ils ont le même nom
+    // exemple:
+    // const pokemon = { name: name};
+    // avec raccourci ECMAScript 6: const pokemon ={name};
 
+    exports.success = (message, data) => {
+        return {
+            message, data
+        }
+    }
 
+### Améliorer les points de terminaison
 
+helper => améliore et complète la réponse pour le consommateur de l'API REST
 
+Ajout message dans les réponses json
 
+    res.json(helper.success(message, pokemon));
 
 
 

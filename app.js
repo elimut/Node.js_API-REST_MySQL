@@ -4,6 +4,7 @@ const app = express();
 // serveur web sur lequel fonctionnera notre API REST
 const port = 3000 ;
 // port sur lequel nous allons démarrer notre API REST par la suite
+const helper = require('./helper.js');
 let pokemons = require('./mock-pokemon');
 // importation du module mock-pokemon, voir fichier mock-pokemon
 
@@ -25,9 +26,13 @@ app.get('/api/pokemons/:id', (req, res) => {
     // message envoyé: nom du pokemon, nam dans objet pokemon suite à la sélection de l'id.
     // message erreur name undefined, méthode find ne renvoie rien.
     // Routeur d'express passe les paramètres sous forme de chaînes de caractères systématiquement, le paramètre id devient une chaîne de caractère => pokemon.id === id => comparaison de deux valeurs non identiques => false, il faut convertir la chaîne de caractère en un nombre => méthode js native parse int
-    res.json(pokemon);
+    // res.json(pokemon);
     // on place dans le corps de la réponse http, un objet js = pokemon
     // retour d'une réponse http grâce à res au format json avec la méthode json(), renvoie d'info grâce à la var pokemon
+    const message = ("Un pokemon a bien été trouvé");
+    res.json(helper.success(message, pokemon));
+    // utilise méthode success pour retourner une réponse structurée
+
 });
 // appel nouvelle route dans navigateur => localhost:3000/api/pokemon/1
 // nouvel endpoint dans l'API
