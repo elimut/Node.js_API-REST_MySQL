@@ -303,6 +303,53 @@ helper => améliore et complète la réponse pour le consommateur de l'API REST
 Ajout message dans les réponses json
 
     res.json(helper.success(message, pokemon));
+    => retour d'une réponse complète
+
+On peut alléger le code, en récupérant success plutôt que helper en entier = **affectation destructurée**
+
+    // const helper = require('./helper.js');
+    const {success} = require('./helper');
+
+### Retourner une liste de données au format json
+
+Exercice2:
+Ajouter un endpoint qui renvoie la liste complète des pokemons au format json, avec un message.
+Cahier des charges:
+- reprendre la route api/pokemons pour avoir la totalité des pokemons,
+- retourner les 12 pokemons,
+- un message indiquant que l'on retourne les 12 pokemons,
+- format json.
+
+    app.get('/api/pokemons', (req, res) => {
+        const message = 'La liste des pokémons a bien été récupérée.'
+        res.json(success(message, pokemons)) 
+    })
+
+## Les middlewares Express
+
+### Définition
+
+Express est en grande partie basé dessus.
+**Ce sont des fonctions js capables d'intéragir avec des requpetes entrantes et sortantes de l'API REST.**
+
+![Middleware](img/Middlewares.png)
+Le middleware A, permet d'appliquer un traitement aux requêtes entrantes et sortantes.
+
+Les middlewares fonctionnenet par dessus les endpoints existants.
+Ils peuvent accèder aux objets res et res d'express.
+Une fois le traitement des middlewares effectués, il faut l'indiquer grâce à la fonction **next()**.
+
+Les éléments req, res et next sont transmis par express directement.
+
+    const middleware(req, res, next) => {
+        <!-- traitement quelconque, on peut intervenir sur les objets req et res, puis on indique à express que le traitement est terminé -->
+        next()
+    }
+     => middleware
+
+Fonctions js qui ont accès à certaines données d'Express.
+
+### Cas d'utilisation
 
 
 

@@ -4,7 +4,10 @@ const app = express();
 // serveur web sur lequel fonctionnera notre API REST
 const port = 3000 ;
 // port sur lequel nous allons démarrer notre API REST par la suite
-const helper = require('./helper.js');
+// const helper = require('./helper.js');
+const {success} = require('./helper');
+// récup seulement de success
+// affectation destructurée, fonction success plutôt que helper
 let pokemons = require('./mock-pokemon');
 // importation du module mock-pokemon, voir fichier mock-pokemon
 
@@ -13,15 +16,16 @@ app.get('/', (req, res) => res.send('Hello express 2'));
 // Chaque élément est important pour définir un point de terminaison:
 // 1- coeur de la requête: get, prend 2 arguments en param => le chemin de la requête, chemin de la route qui va permettre de traiter ce point de terminaison (ici route par défaut) et => fonction qui fournit une réponse à notre client quand point de terminaison est appelé, cette fonction prend également 2 arguments req = récupération de l'objet request qui correspond à la requête reçue en entrée par notre point de terminaison, et res = response objet à renvoyer depuis express au client.
 // Ici on utilise méthode send de l'objet response pour renvoyer le msg
-app.get('/api/pokemons/:id', (req, res) => {
+
+// app.get('/api/pokemons/:id', (req, res) => {
 // ajout valeur dynamique id avec :id, acceptation du paramètre. Express le récupère et le transmets à notre point de terminaison via l'objet req.
     // const id = req.params.id;
     // récupération des paramètres id de l'URL
-    const id = parseInt(req.params.id);
+    // const id = parseInt(req.params.id);
     // conversion de la chaîne de caractère en number 
     // res.send(`Vous avez demandé le pokemon n° ${id}`); = message indiquant l'id choisi
-    const pokemon = pokemons.find(pokemon => pokemon.id === id);
-    // constante qui permet de récupèrer dans le fichier pokemon l'objet choisi grâce à l'id
+    // const pokemon = pokemons.find(pokemon => pokemon.id === id);
+    // constante qui permet de récupèrer dans le fichier pokemons l'objet choisi grâce à l'id
     // res.send(`Vous avez choisi: ${pokemon.name}`);
     // message envoyé: nom du pokemon, nam dans objet pokemon suite à la sélection de l'id.
     // message erreur name undefined, méthode find ne renvoie rien.
@@ -29,19 +33,35 @@ app.get('/api/pokemons/:id', (req, res) => {
     // res.json(pokemon);
     // on place dans le corps de la réponse http, un objet js = pokemon
     // retour d'une réponse http grâce à res au format json avec la méthode json(), renvoie d'info grâce à la var pokemon
-    const message = ("Un pokemon a bien été trouvé");
-    res.json(helper.success(message, pokemon));
+    // const message = ("Un pokemon a bien été trouvé");
+    // res.json(helper.success(message, pokemon));
     // utilise méthode success pour retourner une réponse structurée
-
-});
-// appel nouvelle route dans navigateur => localhost:3000/api/pokemon/1
+    // res.json(success(message, pokemon));
+    // avec affectation destructurée, utilisation de la méthode success sans appeler la méthode success.
+// });
+// appel nouvelle route dans navigateur => localhost:3000/api/pokemons/1
 // nouvel endpoint dans l'API
 
 // Exercice:  création d'un nouvel endpoint renvoie nombre total de pokemon avec méthode get, URL endpoint: /api/pokemons'
-app.get('/api/pokemons', (req, res) =>{
-    res.send(`il y a ${pokemons.length} au total`);
+// app.get('/api/pokemons', (req, res) =>{
+//     res.send(`il y a ${pokemons.length} au total`);
     // utilisation de la propriété longueur du tableau
+// });
+
+// Exercice 2 :
+// Ajouter un endpoint qui renvoie la liste complète des pokemons au format json, avec un message. Cahier des charges:
+// - reprendre la route api/pokemons pour avoir la totalité des pokemons,
+// - retourner les 12 pokemons,
+// - un message indiquant que l'on retourne les 12 pokemons,
+// - format json.
+app.get('/api/pokemons', (req, res) => {
+    // const pokemon1 = pokemons.findAll(pokemon1 => pokemon1);
+    const messageExo = ("Voici la liste des 12 pokemons:");
+    res.json(success(messageExo, pokemons));
 });
+
+
+
 
 app.listen(port, () => console.log(`Notre appli Node est démarrée sur : http://localhost: ${port}`));
 // démarre API REST sur port 3000
