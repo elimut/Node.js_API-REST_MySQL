@@ -351,14 +351,217 @@ Fonctions js qui ont accès à certaines données d'Express.
 
 ### Cas d'utilisation
 
+Les middlewares sont une fonctionnalité d'express suffisamment polyvalente pour effectuer des tâches très diverses.
+
+5 catégories d'utilisation:
+
+- Middleware d'application:
+
+    var app = express();
+
+    <!-- On passe u  middleware en paramètre de la méthode use(): -->
+    app.use(function (req, res, next){
+        console.log('Time:', Date.now());
+        next();
+    });
+
+Ce sont les middlewares les plus courants lorsque l'on débute dans le domaine, reliés directement à l'instance d'express grâce à la méthode use().
+Le middleware sera exécuté à chaque fois que l'API REST recevra une commande.
+Dans ce cas, on affichera un message dans le terminal de commande avec la date complète à laquelle notre API REST a reçu la requête entrante.
+On peut utiliser ce type de middleware pour loger tout type d'événement ou pour autre traitement commun aux requêtes entrantes ou sortantes de notre API REST.
+
+- le middleware du routeur:
+
+Il fonctionne directement au niveau du routeur d'Express.
+Très similaire au précédent mais pas relié à l'instance d'Express. On le branche sur une instance d'express routeur:
+express.Routeur() => création de sous ensemble de routes et définir une hiérarchie et une organisation entre les routes de l'API REST, dans le cas où celle-ci devient importante en taille.
+
+- middleware traitement d'erreur:
+
+    app.use(function(err, req, res, next){
+        console.log(err);
+        res.send('erreur!');
+    });
+
+Il prend quatre arguments en compte pour être identifié, sinon avec 3 express pensra qu'il s'agit d'un middleware ordinaire et ne géreré pas les erreurs correctement.
+
+- le middleware intégré
+
+Il existait quelques middlewares directement intégrés à Express, comme modules dans Node.js.
+Mais un seul reste depuis la v4 => express.static
+Il a comme responsabilité de servir des documents statiques depuis une API REST comme des images, PDF...
+Les autres sont toujours maintenus et utilisables, mais disponibles sous forme de dépendances extérieures à installer.
+
+- les middlewares tiers:
+
+Disponibles sous la forme d'une dépendance extérieure.
+Sont des modules js à installer dans node modules.
+
+### Créer un middleware sur mesure
+
+Création d'un middleware qui affichera les requêtes reçues par l'API REST directement sur le terminal de commande où s'exécutent notre backend.
+
+Déclaration nouveau middleware = logger directement dans le point d'entrée app.js.
+
+    // const logger = (req, res, next) => {
+    //     console.log(`URL: ${req.url}`);
+    //     next();
+    // }
+    // middleware logger, 3 paramètres
+    //  la req http reçue en entrée , la réponse http qui va être exposée au client, la méthode next fournie par Express qui ndique que le traitement est terminé.
+    // loggue l'URL des points de terminaison appelée par les consommateurs de notre API REST.
+    // l'on peut supprimer la var intermédiaire , plus concis
 
 
+    // app.use(logger);
+    // utilisation du nouveau middleware dans l'application express grâce à use
+    // après suppression de la var intermédiaire:
+    app.use((req, res, next)=> {
+        console.log(`URL: ${req.url}`);
+        next();
+    });
+Permet de débugger à la main.
 
 
+### Installer un middleware déjà existant
+
+Middleware **morgan** => s'occupe de la même chose que notre middleware précédent.
+Permet de logger dans le terminal de commande toutes les requêtes entrantes vers notre API, en plus aboutie sans ligne de code.
+
+Module js comme un autre.
+
+npm install morgan --save-dev
+Surtout utile pour le débugage en phase de dév.
+
+Il faut ensuite l'importer dans app.js.
+
+### Communication entre les middlewares
+
+Ils puvent être combinés entre eux et former une chaîne de traitement complète.
+
+![Communication middleware](img/combi%20middleware.png)
+
+Ils communiquent entre eux en transmettant leurs paramètres respectifs.
+Il est possbile de chaîner des middleware sans transmission de paramètres.
+
+Ajout d'un deuxième middlkeware et le combiner avec morgan.
+Bien penser à appeler la fonction next pour chaque middleware, cela permet de transmettre l'exécution au middleware suivant dans la chaîne de traitement.
+
+ => ajout favion à l'API REST
+
+npm install serve-favicon --save
+
+**L'extension d'une favicon est toujours favicon.ico**
+
+    app
+        .use(favicon(__dirname + '/favicon.ico'))
+        .use(morgan('dev'));
+    // combi des middleware, bien télécharger favicon
+    // appel de la méthode use autant de fois que l'on a de middlewares à implémenter
+    // on peut les chaîner les uns à la suite des autres afin d'établir un ordre en eux
+
+__dirname est une variable d'environnement qui vous indique le chemin absolu du répertoire contenant le fichier en cours d'exécution.
+Chaque middleware va renvoyer des données, la requête, la réponse, la fonction suivante à appeler après avoir terminé son traitement spécifique.
 
 
+La méthode next est toujours appelée mais par le middleware directement.
 
 
+## Création d'une API REST complète
 
+Ajout d'un nouveau pokemon:
+construire un nouvel endpoint qui acceptera la requête http: 
+  - action http post,
+  - URL de la ressource, ressource sur laquelle l'on souhaite intervenir = /api/pokemons, (collections de ressources),
+  - les données du pokemon, au formaj json.
+  
 
+    app.post('/api/pokemons', (req, res) =>{
+        // post auprès d'express avec url associée
+        const id = 123;
+        // définition id arbitraire, doit être unique pour générer url unique. On ne peut pas deviner un id déjà pris,  c'est la bdd de déterminer les id uniques, elle seule a accès à l'ensemble des pokemons existants
+        const pokemonCreated = {...req.body, ...{id: id, created: new Date()}}
+        // fusion des données du pokemon reçues via la requête http entrantes avec l'id unique généré + date de création
+        pokemons.push(pokemon.created);
+        // ajout à la liste existante
+        const message1 = `le pokemon ${pokemonCreated.name} a bien été créé`;
+        res.json(success(message1, pokemonCreated));
+    });
+
+Pour récupèrer le plus grand id existant dans la liste et incrémenter.
+On va ajouter la méthode de génération d'id dans helper car fichier outil.
+
+    // ajout méthode pour id
+    exports.getUniqueId = (pokemons) => {
+        const pokemonsIds = pokemons.map(pokemon => pokemon.id);
+        // transfo tableau des pokemons en un tableau d'id des pokemons. méthode map comme for mais en retournant un nv tableau
+        const maxId = pokemonsIds.reduce((a, b) => Math.max(a, b));
+        // méthode js native reduce qui permet de comparer les éléments deux à deux dans un tableau 
+        const uniqueId = maxId ++;
+        return uniqueId;
+
+Par la suite, c'est la bdd mySql qui s'en chargera.
+
+    {
+    "name": "Chenipan",
+    "hp": 29,
+    "cp":4,
+    "picture": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/010.png",
+    "types": ["Insecte", "Poison"]
+    }
+
+        app.post('/api/pokemons', (req, res) =>{
+        // post auprès d'express avec url associée
+        const id = getUniqueId(pokemons);
+        // définition id arbitraire, doit être unique pour générer url unique. On ne peut pas deviner un id déjà pris,  c'est la bdd de déterminer les id uniques, elle seule a accès à l'ensemble des pokemons existants. usage méthode dans helper
+        const pokemonCreated = {...req.body, ...{id: id, created: new Date()}}
+        // fusion des données du pokemon reçues via la requête http entrantes avec l'id unique généré + date de création
+        pokemons.push(pokemon.created);
+        // ajout à la liste existante
+        const message1 = `le pokemon ${pokemonCreated.name} a bien été créé`;
+        res.json(success(message1, pokemonCreated));
+    });
+
+localhost:3000/api/pokemons
+
+Pas les données id et created, c'est au backend d'attribuer un id unique, created pas de valeur dynamique depuis fichier json => c'est le serveur qui se charge de la date de création des ressources.
+
+=>
+
+    {
+        "message": "le pokemon undefined a bien été créé",
+        "data": {
+            "id": 14,
+            "created": "2023-06-22T12:46:26.225Z"
+        }
+    }
+ =>renvoie chaîne de caractères, quand les dinnées http transitent via le protocole http, elles ne oeuvent l'être que sous la forme d'une chaîne de caractères.
+Conversion en chaines de caractère en json.
+
+### Parser nos données avec un middleware
+
+Comment récupèrer des données au format json depuis notre API REST.
+Il existe deux opérations majeures lorsque l'on utilise le format json:
+- **On peut parser une chaîne de caractères afin d'obtenir du json. Grâce à la méthode native du nav: JSON.parse()**:
+  
+    const userString = '{"name: "john", "age": 33}'
+    => réception données sous fore de chaîne de caractères
+
+    const userJson = JSON.parse(userString);
+    => on parse la chaîne de caractère afin d'obtenir du json utilisable partout dans le code, sans import car méthode native.
+
+- on peut **stringifier** un json afin d'obtenir une chaîne de caractères (retour client), méthode JSON.stringify:
+
+    console.log(JSON.stringify(userJSON));
+    => en paramètres données au format json.
+
+![json](img/prsing%20stringify.png)
+![json](img/exemple%20json.png)
+
+Une chaîne de caractères en js n'a pas de propriété âge, alors que pour json c'est tout à fait possible.
+Mise en place du middleware **body parser**.
+
+=> npm install body-parser --save
+
+### Modifier un pokemon
 
