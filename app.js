@@ -5,10 +5,40 @@ const morgan = require('morgan');
 const favicon = require ('serve-favicon');
 // dépendance favicon
 const bodyParser = require('body-parser');
+const {Sequelize} = require('sequelize');
+//  La syntaxe {sequelize} extrait la propriété sequelize de l'objet exporté par le module, et l'assigne à une variable locale appelée sequelize. Cela vous permet d'accéder directement à la propriété sequelize sans avoir à référencer l'objet complet à chaque fois. Par exemple, au lieu d'écrire sequelize.method(), vous pouvez simplement écrire method(). En résumé, les accolades {} et la déstructuration permettent d'extraire des valeurs spécifiques d'un objet ou d'un tableau et de les assigner à des variables distinctes. Dans votre code, cela est utilisé pour extraire la propriété sequelize du module sequelize et l'assigner à une variable locale appelée sequelize.
+
+
 const app = express();
 // serveur web sur lequel fonctionnera notre API REST
 const port = 3000 ;
 // port sur lequel nous allons démarrer notre API REST par la suite
+
+const sequelize =  new Sequelize(
+    'pokedex',
+    // nom bdd
+    'root',
+    // id
+    'root',
+    // mdp
+    {
+        host: 'localhost',
+        dialect: 'mysql',
+        dialectOptions: {
+            timezone: 'Etc/GMT-2'
+        },
+        logging: false
+    }
+    // objet de config, on doit obligatoiremet passer par la clé host qui permet d'indiquer où se trouve la bdd sur la machine, et dialect qui est le nom du driver que ns utilisons pour permettre à Sequelize d'intéragir avec la bdd. timezon et logging  => permettent d'éviter des affichages d'avertissement dans la console plus tard, pas obli.
+);
+// cette instance Sequelize représente la connexion à la bdd, et on va s'en servir ensuite. 4 param au consctructeur Sequelize
+
+sequelize.authenticate()
+    .then(_ => console.log('La co a réussi'))
+    .catch(error => console.log(`ko ${error}`))
+
+
+
 // const helper = require('./helper.js');
 const {success, getUniqueId} = require('./helper');
 // récup seulement de success
@@ -91,7 +121,7 @@ app.get('/api/pokemons/:id', (req, res) => {
 // - format json.
 app.get('/api/pokemons', (req, res) => {
     // const pokemon1 = pokemons.findAll(pokemon1 => pokemon1);
-    const messageExo = ("Voici la liste des 12 pokemons:");
+    const messageExo = ("Voici la liste des pokemons:");
     res.json(success(messageExo, pokemons));
 });
 
@@ -114,7 +144,28 @@ app.post('/api/pokemons', (req, res) =>{
     // il faut utiliser un middleware pour convertir en json.
 });
 
+// modification d'un pokemon, avec action http put, nouveau point de terminaison dans notr point d'entrée app.js
+app.put('/api/pokemons/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const pokemonUpdated = {...req.body, id: id};
+    pokemons = pokemons.map(pokemon => {
+        return pokemon.id === id ? pokemonUpdated : pokemon;
+    })
+    // traitement de la modification du pokemon. Il faut mettre à jour la liste globale de pokemon en remplaçant l'ancien par le nouveau modifié avec méthode map. Retour du même pokemon sauf s'il s'agit du pokemon à modifier. On obtient ainsi la liste des pokemon à jour avec la modif demandée par le client.
+    const message3 = `Le pokemon ${pokemonUpdated.name} a bien été modifié`;
+    res.json(success(message3, pokemonUpdated));
+});
+
+// suppression avec delete
+app.delete('/api/pokemons/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const pokemonDeleted = pokemons.find(pokemon => pokemon.id === id);
+    pokemons.filter(pokemon => pokemon.id !== id);
+    // méthode js native filter => nouvelle liste sans le pokemon supprimé. L'on retourne le pokemon supprimé au client
+    const message = `Le pokemon ${pokemonDeleted.name} a bien été supprimé`;
+    res.json(success(message, pokemonDeleted));
+});
 
 app.listen(port, () => console.log(`Notre appli Node est démarrée sur : http://localhost: ${port}`));
 // démarre API REST sur port 3000
-// envoie d'une requête get via API REST, et a retourné une réponse 
+// envoi d'une requête get via API REST, et a retourné une réponse 

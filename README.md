@@ -550,7 +550,7 @@ Il existe deux opérations majeures lorsque l'on utilise le format json:
     const userJson = JSON.parse(userString);
     => on parse la chaîne de caractère afin d'obtenir du json utilisable partout dans le code, sans import car méthode native.
 
-- on peut **stringifier** un json afin d'obtenir une chaîne de caractères (retour client), méthode JSON.stringify:
+- on peut **stringyfier** un json afin d'obtenir une chaîne de caractères (retour client), méthode JSON.stringify:
 
     console.log(JSON.stringify(userJSON));
     => en paramètres données au format json.
@@ -564,4 +564,71 @@ Mise en place du middleware **body parser**.
 => npm install body-parser --save
 
 ### Modifier un pokemon
+
+Avec action http **put**, mofication de l'ensemble de la ressource côté api rest;
+Pour modifier seulement le nom, l'on ne modifie pas directement la ressource, l'on en crée une nouvelle avec la modification souhaitée et l'on remplace l'ensemble de la ressource souhaitée par la nouvelle => si deux modifications de la même ressource en même temps => risque de collision, contrairement à la soumission de la nouvelle version complète de la ressource, où les modifications peuvent s'enchaîner les une à la suite des autres logiquement.
+**Chaque modification introduit qu'un seul et unique effet de bord sur le serveur plutôt que des changements de propriétés de tous les côtés.**
+Pour modfier seulement une partie de ressource, en http, il existe une autre opération = **patch**, mais plutôt put. C'est une méthode plus fiable.
+(put patch idempotence)[https://blog.octo.com/should-i-put-or-should-i-patch/]
+
+test modification:
+
+    {
+    "name": "Anneso",
+    "hp": 29,
+    "cp":4,
+    "picture": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/010.png",
+    "types": ["Insecte", "Poison"]
+    }
+
+![Différence get et put](img/Différence%20get%20et%20put.png)
+Dans le premier cas, on a des accolades supplémentaires entourant les propriétés qui sont ajoutées aux pokemon. La différence, dans le deuxième cas on ajoute une seule propriété, dans le premier un ensemble de deux propriétés à l'objet initial.
+
+### Supprimer un pokemon
+
+**delete**
+
+**Dans une API REST, les collections de ressource sont également des ressources.**
+Appel méthode delete sur URL /pokemons/1 => suppression d'un pokemon
+Appel méthode delete sur URL /pokemons => suppression tout les pokemons.
+
+### Exercice: vérifier que l'API fonctionne
+
+Exécution des requêtes:
+(npm start pour r"initialiser la liste)
+![Exercice](img/Exercice.png)
+
+## Lien avec la base de données
+
+### Comprendre le rôle d'un ORM
+
+![ORM](img/orm.png)
+
+**ORM**:
+Object Relationnal Mapping, technique de programmation puissante qui permet de convertir les bases de données dans des langages comme js.
+Masque complétement le fait qu'il y ait une base de données.
+On continue le développement de l'API REST, mais on intéragir avec des objets js fournis par l'ORM.
+On appelle des méthodes sur des objets JS.
+
+Pas besoin de connaître le SQL.
+Abstracation de la bdd, on peut changer de bdd sans modifier le code des requêtes sql,
+Si on crée un nouvel objet js, l'ORM va s'occuper de le pousser en bdd (comme maj, suppression,...),
+Fournit les requêtes les plus basiques,
+
+### Installer l'ORM Sequelize
+
+Il existe un ORM js pour les badd SQL qui sort du lot: **Sequelize**.
+Sequelize destinés aux utilisateurs de Node.js, entièrement basé sur les promesses de js.
+Il permet donc de gérer les traitements async de manière plus efficace que de simples callback.
+On a beaucoup de taitements async car lors de l'appel de la bdd, il y a un délai de réponse.
+Intéraction avec la BDD depuis l'API REST.
+
+Installation:
+
+npm install sequelize --save
+Il faut installer un **driver** => Sequelize crée une couche d'abstraction par rapport à la base de données utilisée. Cependant il y a bien un moment où l'on se connecte à la bdd, d'où le driver.
+Chaque bdd SQL a son propre driver afin de permettre à l'ORM d'intéragir avec elle.
+
+npm install --save mysql2
+[Sequelize](https://sequelize.org/docs/v6/getting-started/)
 
