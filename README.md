@@ -632,3 +632,50 @@ Chaque bdd SQL a son propre driver afin de permettre à l'ORM d'intéragir avec 
 npm install --save mysql2
 [Sequelize](https://sequelize.org/docs/v6/getting-started/)
 
+### Connecter MySQL et l'API REST
+
+Union Sequelize, mySQL, et API REST.
+Il faut les assembler si l'on veut obtenir un résultat.
+Sequelize est très simple à configurer =>
+app.js ajout du code nécessaire pour se connecter à mySQL via Sequelize.
+3 étapes:
+- import Sequelize,
+- création et configuration d'une instance de la classe de Sequelize,
+- test si connexion ok avec méthode authenticate de Sequelize.
+
+Création bdd:
+create database pokedex;
+use pokedex;
+
+### Réflexion sur l'organisation du code
+
+app.js a trop de rôles différents:
+initialisation du serveur Express,
+connexion à la bdd,
+gestion des routes et points de terminaison,...
+Il contient trop de code.
+
+Notre architecture doit être adpatée aux besoins du projet, migration vers des modules js à part qui auront un rôle dédié.
+
+3 rôles différents:
+points de terminaison,
+démarrage du serveur,
+intéraction bdd.
+
+Ici intégration de plusieurs outils et de configuration, on va construire par dessus notre API REST une véritable base de données.
+
+## API REST et base de données
+
+### Présentation des modèles Sequelize
+
+Fonctionnement de Sequelize:
+
+nous devons prendre connaissance du concept de modèle ou **models**: essence même de Sequelize.
+
+Qu'est ce qu'un models:
+
+![models](img/models.png)
+Un models est une abstraction qui représente une table dans notre bdd.
+Avec Sequelize on va donc déclarer un modèle Pokemon qui représentera la table contenant les pokemons du côté de notre bdd.
+
+Un modèle est un objet js spécifique fourni par Sequelize, que l'on peut paramètrer en fonction de nos propres besoins.
