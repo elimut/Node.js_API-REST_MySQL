@@ -679,3 +679,26 @@ Un models est une abstraction qui représente une table dans notre bdd.
 Avec Sequelize on va donc déclarer un modèle Pokemon qui représentera la table contenant les pokemons du côté de notre bdd.
 
 Un modèle est un objet js spécifique fourni par Sequelize, que l'on peut paramètrer en fonction de nos propres besoins.
+Cet objet spécifique contient plusieurs propriétés qui décrivent à Sequelize la structure de l'entité qui doit être stocké (ex:adresse image, PV,...), pour chacune de ses propriétés il faut préciser le type de la propriété.
+
+On déclare des objets avec certaines propriétes en js dans le code de l'PAI REST et Sequelize s'occupe du reste, il fournit la couche d'abstraction dont on a besoin.
+Nous devrons donner un nom à chaque models Sequelize que nous créerons.
+Exemple, un modèle pokemon afin de modéliser un pokemon. Sequelize va se baser sur ce nom et va lui ajouter la lettre s en suffixe pour déterminer le nom de la table.
+Ainsi, la table associée au pokemon se nommero => pokemons.
+![nom models](img/models_nom_table.png)
+Sequelize se contente de passer le nom au pluriel pour déterminer le nom d'une table.
+
+### Créer un modèle Sequelize
+
+Déclarer un objet js en respectant les conventions proposées par Sequelize.
+
+Création d'un dossier src et dedans un dossier models.
+Cela nous permettra de mieux structurer notre code et commencer à préparers l'architecture de notre API REST.
+
+Le dossier src contiendra notre code source de notre API REST, le models contiendra les models Sequelize de notre projet.
+
+Création du models pokemons.js dans models.
+
+    module.exports = (sequelize, DataTypes) => {
+    return sequelize.define('Pokemon', {
+        // export  fonction de deux param: sequelize = objet représente la co à la bdd pour Sequelize, cet objet possède une propriété define qui permet de déclarer un nouveau models auprès de sequelize et datatypes = définit les types de données de chaque propriétés du models ex: name => string
