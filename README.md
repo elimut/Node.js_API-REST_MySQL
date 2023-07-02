@@ -702,3 +702,19 @@ Création du models pokemons.js dans models.
     module.exports = (sequelize, DataTypes) => {
     return sequelize.define('Pokemon', {
         // export  fonction de deux param: sequelize = objet représente la co à la bdd pour Sequelize, cet objet possède une propriété define qui permet de déclarer un nouveau models auprès de sequelize et datatypes = définit les types de données de chaque propriétés du models ex: name => string
+
+### Syncrhoniser la bdd avec Sequelize
+
+L'on peut maintenant piloter la bdd directement depuis du code js.
+Voir import src models, sync.
+
+    // synch avec l'état de la bdd avec méthode sync. En arrière plan: synch de tous les models Sequelize de l'API REST avec la bdd
+    // force: true permet de supprimer la table associée à chaque modèle avant d'effectuer la synchro, on perd les données de la table à chaque synchro à terme nous nous en débarasserons
+
+### Instancier un modèle Sequelize
+
+La table est vide, il faut donc la remplir.
+Comment?
+
+Sequelize => ajout de pokemon, il faut créer des instances grâce au model.
+**Chaque models Sequelize possède une méthode create.**

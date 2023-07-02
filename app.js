@@ -5,9 +5,9 @@ const morgan = require('morgan');
 const favicon = require ('serve-favicon');
 // dépendance favicon
 const bodyParser = require('body-parser');
-const {Sequelize} = require('sequelize');
+const {Sequelize, DataTypes} = require('sequelize');
 //  La syntaxe {sequelize} extrait la propriété sequelize de l'objet exporté par le module, et l'assigne à une variable locale appelée sequelize. Cela vous permet d'accéder directement à la propriété sequelize sans avoir à référencer l'objet complet à chaque fois. Par exemple, au lieu d'écrire sequelize.method(), vous pouvez simplement écrire method(). En résumé, les accolades {} et la déstructuration permettent d'extraire des valeurs spécifiques d'un objet ou d'un tableau et de les assigner à des variables distinctes. Dans votre code, cela est utilisé pour extraire la propriété sequelize du module sequelize et l'assigner à une variable locale appelée sequelize.
-
+//2- import objet DataTypes (synch bdd) qui contient les types dispo dans Sequelize, pour définir les types de données contenues dans les propriétés des modesl
 
 const app = express();
 // serveur web sur lequel fonctionnera notre API REST
@@ -62,6 +62,24 @@ let pokemons = require('./mock-pokemon');
 //     console.log(`URL: ${req.url}`);
 //      next();
 // });
+const PokemonModel = require('./src/models/pokemons');
+// 1- import models pour synch bdd
+const Pokemon = PokemonModel(sequelize, DataTypes);
+// 3- instanciation du models pokemon, dire à Sequelize de créer la table pokemon associée à ce models.
+sequelize.sync({force: true})
+    .then(_ =>{
+        console.log("synchro ok");
+        Pokemon.create({
+        // méthode create() avec en paramètre les données que nous voulons pour le premier pokemon en bdd, pas d'id ni date de créa =< Sequelize le demande à la bdd
+            name: "Bulbizar",
+            hp: 25,
+            cp: 5,
+            picture: "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/001.png",
+            types: ["Plante", "Poison"].join()
+        }).then(bulbizarre => console.log(bulbizarre.toJSON()));
+});
+// synch avec l'état de la bdd avec méthode sync. En arrière plan: synch de tous les models Sequelize de l'API REST avec la bdd
+// force: true permet de supprimer la table associée à chaque modèle avant d'effectuer la synchro, on perd les données de la table à chaque synchro à terme nous nous en débarasserons de l'option force. sert pour le dev, repart sur données neuves à chaque redémarrage.
 
 app
     .use(favicon(__dirname + '/favicon.ico'))                                                                                                                                                                                                                                    
