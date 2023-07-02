@@ -140,7 +140,7 @@ npm install express --save
 npm télécharge express, dans dossier node modules.
 npm regarde package.json mais de la librairie express, car paquet js qui a lui même ses dépendances.
 
---save afin de déclarer express sans les dépendances, et non juste en local sur machine via node modules.
+--save afin de déclarer express dans les dépendances, et non juste en local sur machine via node modules.
 
 Le dossier node module est géré par npm, ne pas y toucher.
 
@@ -617,7 +617,7 @@ Fournit les requêtes les plus basiques,
 
 ### Installer l'ORM Sequelize
 
-Il existe un ORM js pour les badd SQL qui sort du lot: **Sequelize**.
+Il existe un ORM js pour les bdd SQL qui sort du lot: **Sequelize**.
 Sequelize destinés aux utilisateurs de Node.js, entièrement basé sur les promesses de js.
 Il permet donc de gérer les traitements async de manière plus efficace que de simples callback.
 On a beaucoup de taitements async car lors de l'appel de la bdd, il y a un délai de réponse.
@@ -731,3 +731,77 @@ Dans l'autre sens? une fois les données stockées en une chaîne de caractères
     const types = "Plantes, Poison";
     console.log(types.split(","));
     => ["Plantes","Poison"]
+
+### Initialisation avec 12 pokemons
+
+Il faut répeter la même opération 12 fois.
+Utilisation de la méthode map pour boucler sur la lsite des pokemon statiques dans mock-pokemon.js
+
+
+    sequelize.sync({force: true})
+        .then(_ =>{
+            console.log("synchro ok");
+            pokemons.map(pokemon => {
+            Pokemon.create({
+            // méthode create() avec en paramètre les données que nous voulons pour le premier pokemon en bdd, pas d'id ni date de créa =< Sequelize le demande à la bdd
+                // name: "Bulbizar",
+                name: pokemon.name,
+                // hp: 25,
+                hp: pokemon.hp,
+                // cp: 5,
+                cp: pokemon.hp,
+                // picture: "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/001.png",
+                picture: pokemon.picture,
+                // types: ["Plante", "Poison"].join()
+                types: pokemon.types.join()
+                // join() => la propriété types est un string en bdd mais sur l'API est un tableau de string, on applique la méthode native join sur le tableau js afin de générer une chaîne de caractères unique pouvant être sauvegard&e en bdd.
+            }).then(bulbizarre => console.log(bulbizarre.toJSON()));
+            // méthode toJSON fournie par Sequelize, recommandée pour afficher correvtement les informations des instances d'un modèle. Sequelize attache un tas de prop et méthode sur les models en interne, ainsi l'on affiche que les valeurs qui nous interresssent 
+            // create retourne une promesse js, nous utlisons donc then, tmt async car sequelize doit effectuer en arrière plan une requête en bdd, attendre sa réponse
+        });
+    });
+    // synch avec l'état de la bdd avec méthode sync. En arrière plan: synch de tous les models Sequelize de l'API REST avec la bdd
+    // force: true permet de supprimer la table associée à chaque modèle avant d'effectuer la synchro, on perd les données de la table à chaque synchro à terme nous nous en débarasserons de l'option force. sert pour le dev, repart sur données neuves à chaque redémarrage.
+
+### Restructurer l'architecture
+
+A chaue démarrage de l'API REST, la bdd est initialisée avec 12 pokemons.
+Avant d'effectuer les ppération scrud, il faut struicturer l'API REST.
+On mélange le code dans app.js => illisible et inutilisable, il faut mettre en place une architecture capable d'encaisser les développements futurs relatifs à Sequelize et nettoyer ce qui est obsolète:
+
+plan => 
+- allèger le point d'entrée app.js qui commence à avoir plusieurs rôles complètementdifférents (co bdd, démarrage serveur express, déf des points de terminaisons,...)
+- supprimer le module helper.js, ce module permet simplement de générer un id unique devenu inutile avec la bdd,
+- modifier l'emplacement de modifier l'emplacement de mock.js pour migrer petit à petit l'ensemble du code dans src,
+- création d'un nouveau fichier dédié de la connexion à la bdd, qui sera chargé de génèrer et d'exposer des models Sequelize prêts à l'emploi dans le reste de l'API REST.
+
+1: suppression helper.js
+2: déplacer mock dans le dossier src db, tout ce qui concerne la db sera dans ce dossier
+3: création nouveau module Sequelize.js dans source db => gestion de la connexion à la bdd et exportation des models prêt à être utilisé dans le reste de l'API REST.
+4: nettoyer app.js. L'on va retirer les points de terminaison car ils n'intéragissent pas avec la bdd mais une liste statique, il faut les réecrire afin d'intéragir avec la bdd et également découper les points dans son propre module js pour la nopuvelle architecture. app.js a retrouvé son rôle de démarrer un serveur express.
+
+### Récupèrer l'ensemble des pokemons
+
+La route permettant de récupèrer la liste des pokemons tous les pokemons présents dans la bd et non plus une liste statique.
+Liaison de l'API et bdd avec Sequelize mais il manque des éléments.
+On va se baser sur notre models.
+Précedemment nous avons utilisé la méthode create pour créer une nouvelle ligne d'information dans une table côté bdd, mais cette fois nous allons utiliser findAll().
+Xréation un nouveau fichier findAll dans src/routes.
+Chaque point de terminaison sera placé dans son module js dans dossier routes.
+
+Voir module finAllPokemons.
+Dans app.js:
+
+    require('./src/routes/findAllPokemons')(app)
+    // ajout endpoint du module, on ne côte plus le traitement  du endpoint et la route directement dans app.js mais dans module dédié.
+
+    //import point de terminaison exporté sous forme d'une fonction
+    const findAllPokemons = require('./src...')
+    //on met en place une nouvelle route auprès d'express, en appelant le endpoint avec le paramètre 'app' qui notre application d'express
+    findAllPokemons(app)
+
+### Récupèrer un pokemon en particulier
+
+Avec son id, Sequelize méthode finfByPk() avec ebn paramètre l'id unique que l'on souhaite récupèrer en bdd.
+
+
