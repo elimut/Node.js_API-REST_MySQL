@@ -717,4 +717,6 @@ La table est vide, il faut donc la remplir.
 Comment?
 
 Sequelize => ajout de pokemon, il faut créer des instances grâce au model.
-**Chaque models Sequelize possède une méthode create.**
+**Chaque models Sequelize possède une méthode Create() afin de créer une nouvelle instance de pokemon directement en bdd** => nouvelle ligne en bdd dans la table avec les informations du nouveau pokemon.
+
+Ajout du code dans la méthode de synchronisation.
