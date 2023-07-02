@@ -718,3 +718,16 @@ Comment?
 
 Sequelize => ajout de pokemon, il faut créer des instances grâce au model.
 **Chaque models Sequelize possède une méthode create.**
+Sequelize demande nouvel id et nouvelle date de création à la bdd.
+
+join() => la propriété types est un string en bdd mais sur l'API est un tableau de string, on applique la méthode native join sur le tableau js afin de générer une chaîne de caractères unique pouvant être sauvegard&e en bdd.
+
+    const types = ["Plantes", "Poison"];
+    console.log(types.join());
+    => "Plantes, Poison"
+join crée et renvoie une nouvelle chaîne de caractères en concaténant tout les éléments d'un tableau séparés par une virgule.
+Dans l'autre sens? une fois les données stockées en une chaîne de caractères unique en bdd, l'on peut reconstruire le tableau avec la méthode split()
+ 
+    const types = "Plantes, Poison";
+    console.log(types.split(","));
+    => ["Plantes","Poison"]

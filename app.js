@@ -76,7 +76,9 @@ sequelize.sync({force: true})
             cp: 5,
             picture: "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/001.png",
             types: ["Plante", "Poison"].join()
+            // join() => la propriété types est un string en bdd mais sur l'API est un tableau de string, on applique la méthode native join sur le tableau js afin de générer une chaîne de caractères unique pouvant être sauvegard&e en bdd.
         }).then(bulbizarre => console.log(bulbizarre.toJSON()));
+        // create retourne une promesse js, nous utlisons donc then, tmt async car sequelize doit effectuer en arrière plan une requête en bdd, attendre sa réponse
 });
 // synch avec l'état de la bdd avec méthode sync. En arrière plan: synch de tous les models Sequelize de l'API REST avec la bdd
 // force: true permet de supprimer la table associée à chaque modèle avant d'effectuer la synchro, on perd les données de la table à chaque synchro à terme nous nous en débarasserons de l'option force. sert pour le dev, repart sur données neuves à chaque redémarrage.
