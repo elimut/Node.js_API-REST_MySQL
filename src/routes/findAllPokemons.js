@@ -7,6 +7,7 @@ module.exports = (app) => {
         const message = 'La liste des pokémons a bien été récupérée.'
         res.json({ message, data: pokemons })
       })
+      .catch(error => console.log(error));
   })
 }
 // définition d'un point de terminaison complet dans son propre module js

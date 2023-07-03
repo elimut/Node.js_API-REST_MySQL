@@ -29,7 +29,15 @@ module.exports = (sequelize, DataTypes) => {
       },
       types: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        get() {
+          return this.getDataValue("types").split(',');
+        },
+        // à chaque fois que l'on récupère les types dans le code js, sequelize fournit: la valeur contenue dans la bdd soit la chaîne de carac. split on obtient [,]
+        set(types){
+          this.setDataValue('types', types.join());
+        // inverse du getter transfor du tab de types de pokemon en chaine de caractère unique => sequelize.js
+        }
       }
     }, {
       timestamps: true,

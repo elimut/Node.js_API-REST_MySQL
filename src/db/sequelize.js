@@ -1,6 +1,8 @@
 const { Sequelize, DataTypes } = require('sequelize')
 const PokemonModel = require('../models/pokemon')
+const UserModel = require('../models/user')
 const pokemons = require('./mock-pokemon')
+const bcrypt = require('bcrypt')
   
 const sequelize = new Sequelize('pokedex', 'root', 'password', {
   host: 'localhost',
@@ -12,6 +14,8 @@ const sequelize = new Sequelize('pokedex', 'root', 'password', {
 })
   
 const Pokemon = PokemonModel(sequelize, DataTypes)
+const User = UserModel(sequelize, DataTypes)
+// instance user auprès de sequelize
   
 const initDb = () => {
   return sequelize.sync({force: true}).then(_ => {
@@ -21,16 +25,32 @@ const initDb = () => {
         hp: pokemon.hp,
         cp: pokemon.cp,
         picture: pokemon.picture,
-        types: pokemon.types.join()
+        // types: pokemon.types.join()
+        // retrait join() suite mise en place setter voir models
+        types: pokemon.types
       }).then(pokemon => console.log(pokemon.toJSON()))
+    })
+
+    bcrypt.hash('pikachu', 10)
+    // méthode hash prend deux paramètres: le mdp en lui même, et un nombre entier le salt rounds = temps nécessaire pour attacher correctement un mdp (plus élevé plus mdp sera difficile à être décrypté mais délai encryptage plus logn)
+    .then(hash=> {
+      // récup mdp crypté
+      User.create({ 
+        username: 'pikachu',
+        password: hash
+        // on pousse en bdd le mdp hashé et pas celui en clair
+      }).then(user => console.log(user.toJSON()))
     })
     console.log('La base de donnée a bien été initialisée !')
   })
 }
 // initialisation du models
+
+
+
   
 module.exports = { 
-  initDb, Pokemon
+  initDb, Pokemon, User
 }
 // export de la fonction initDB qui permet d'initialiser la bdd et model sequelize Pokemon pour s'en servir ailleurs dans le code.
 

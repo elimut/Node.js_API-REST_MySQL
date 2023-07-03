@@ -806,3 +806,123 @@ Dans app.js:
 
 Avec son id, Sequelize méthode finfByPk() avec en paramètre l'id unique que l'on souhaite récupèrer en bdd.
 
+### Créer un pokemon
+
+create
+
+### Enrichir les modèles avec des getter/setter
+
+Sequelize permet de définir des getter et des setter personnalisés pour les propriétés de nos models.
+Ajout au niveau de la propriété types.
+Permet de mettre en place un traaitement d'allers retours entre le format d'une donnée transitant entre l'API et la bdd.
+
+Exemple de création:
+
+      {"name": "Anne",
+    "hp": 25,
+    "cp": 5,
+    "picture": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/001.png",
+    "types": ["Plante,Poison"]}
+
+### Modifier
+
+update
+
+### Supprimer
+
+delete
+
+## La gestion des erreurs
+
+Il existe des 2 types d'erreurs:
+- programmation rencontrées durant le développement, voir les console.log,
+- opérationnelles, se produisent lorsque des consommateurs intéragiront avec l'API REST.
+
+Il fait anticiper les erreurs liées à l'usage.
+
+Soit réussite de l'appel à l'API ou échec.
+
+### Importance des codes de statut HTTP
+
+Attachés aux réponses HTTP.
+404 => code de statut page non trouvée,
+503 => vidéo tempoirairement indisponible,
+Il en existe plus de 70.
+
+Il y a cinq grandes familles:
+
+1XX => information
+communique des informations au niveau du protocole de transfert en lui même, aucune données n'est échangée entre le client et le serveur on parle de **métadonnées**.
+2XX => le succès
+requête acceptée et traitée avec succès,
+3XX => redirection
+le client souhaite accèder à une ressource mais déplacée depuis, souvent deuxième requête pour accèder au données
+4XX => erreur client
+le client s'est trompé, exemple demande ressource non existante. 401 => pas autorisé, 404 => introuvable
+5XX => erreur serveur
+le serveur n'est pas en état de fournir une réponse au client
+
+
+## Sécurité et authentification avec JWT
+
+## Présentation de l'authentification
+
+N'importe quel consommateur eut consulter ou modifier nos pokemons depuis l'API REST.
+Il faut demander une authentification avant l'intéraction.
+Il faut un point de terminaison dédié à la tâche de connexion, son rôle sera de demander aux utilisateurs de s'authentifier grâce à un id etun mdp.
+Il faut respecter deux exigences principales => encrypter le mdp, dans une API REST il faut garder les données sur le long terme et certaines sont sensibles.
+Puis sécuriser échanges des données, l'user doit pouvoir consommer les points de terminaison en toute sécurité.
+### Créer un modèle pour l'utilisateur
+
+Comparaison les id externes envoyés à l'API REST par le consommateur avec ceux déjà présents en bdd.
+
+=> création d'un models Sequelize user pour modéliser un user dans l'API REST.
+### Ajouter une contrainte d'unicité
+
+Il manque une règle de validation primordiale pour l'authentification:
+- **l'id doit être unique, mail ou pseudo => doit être unique!**
+_ un mot de passe.
+
+L'unicité est garantie grâce à une contrainte de Sequelize.
+Dans notre cas rendre unique nom utilisateur => contrainte unicité au models.
+
+
+    module.exports = (sequelize, DataTypes) => {
+    return sequelize.define('User', {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      username: {
+        type: DataTypes.STRING,
+        unique: {
+            msg: 'Le nom est déjà pris.'
+        }
+      },
+      password: {
+        type: DataTypes.STRING
+      }
+    })
+  }
+
+### Sauvegarder un utilisateur sur MySQL
+
+L'on va initialiser la bdd avec un utilisateur.
+Voir sequelize.js.
+
+Le mdp est en clair dans la base de données, ils doivent être encrypté.
+
+### Encrypter un mdp
+
+On va utiliser l'écosystème de nodeJS avec des modules => **bcrypt**.
+
+npm install bcrypt --save
+
+bcrypt: utilise un algotithme interne pour crypter les mdp des utilisateurs sous la forme d'un hash, qui peuvent être sauvegardé en bdd de manière sûre.
+Ensuite quand l'utilisateur tentera de se connecter, bcrypt va crypter ce nouveau mdp envoyé par l'user qfin de le comparer avec celui en bdd.
+
+Il faut encrypter le mdp avec une méthode: **hash**
+Voir sequelize.js
+
+### Créer route de connexion

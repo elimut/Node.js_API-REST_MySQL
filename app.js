@@ -57,6 +57,10 @@ sequelize.initDb();
 require('./src/routes/findAllPokemons')(app);
 // ajout endpoint du module, on ne côte plus le traitement  du endpoint et la route directement dans app.js mais dans module dédié.
 require('./src/routes/findPokemonByPk')(app);
+require('./src/routes/createPokemon')(app);
+require('./src/routes/updatePokemon')(app);
+require('./src/routes/deletePokemon')(app);
+
 
 // app.use(morgan('dev'));
 //attacher middleware dans l'API REST avec express, on peut paramètrer le message affiché
