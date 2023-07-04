@@ -926,3 +926,67 @@ Il faut encrypter le mdp avec une méthode: **hash**
 Voir sequelize.js
 
 ### Créer route de connexion
+
+L'on dispose d'un mdp encrypté dans la bdd, mais n'a aucun moyen de s'authentifier sur l'API REST.
+Il faut implémenter un point de terminaison pour s'authentifier => endpoint authentification.
+
+loggin.js
+
+### Gérer les cas d'erreurs de la connexion
+
+Identification des écarts éventuels: demande 2 infos id et mdp, on peut s'attendre à deux types d'erreurs possibles =>
+id incorrect
+mdp invalide
+Dans endpoint.
+
+### Pourquoi utliser un jeton JWT
+
+Authentification: encrypter mdp avec bcrypt, puis sécuriser échange des données => **jeton JWT**.
+L'authentificztion entre une application web et une API REST repose sur le standard reconnu qui est l'authentification avec JWT = JSON Web Token.
+Ce standrad est également utilisé par les applications mobiles car il permet de s'authentifier sur un serveur distant.
+
+
+**Un jeton JWT est une véritable clef cryptée, avec une durée de validité dans le temps, et qui se présente sous la forme d'une chaîne de caratères.**
+Tant que le jeton est valide, on pas pouvoir l'utiliser pour demander des données protégées au serveur.
+
+Etapes:
+- client effectuer une requête afin de s'authentifier auprès de l'API REST => il devra transmettre un id et mdp aux endpoints de connexion,
+- vérifier si id et mdp sont corrects grâce à bcrypt, si c'est le cas l'API REST renvoie un jeton JWT valide au clientsinon message d'erreur,
+- grâce au jeton, le client peut effectuer des requêtes sécurisés vers les endpoints de l'API REST. Mais il devra bien transmettre le jeton JWT pour chaque requête nécessitant d'être authentifiée. Ce jeton JWT, se transmets dans l'en-tête de la requête HTTP. Si jeton plus valide, il doit en demander un nouveau,
+- si jeton valide alors l'on doit renvoyer les données demandées au client, sinon refus.
+
+Le jeton JWT est-il sécurisé?
+l'API REST est chargée de regarder d'où viennent les requêtes qu'elle reçoit. Elle n'envoie pas des jetons par défaut => norme CORS.
+Le jeton généré est valide pour une durée limitée.
+
+Il faut générer des jetons pour les clients, les receptionner dans nos endpoints pour indiquer  s'ils sont valides ou pas à chauqe fois.
+
+### Générer une jeton JWT
+
+installation du module json web token
+
+npm install jsonwebtoken --save
+
+Il faut rassembler trois informations différentes pour générer un jeton JWT valide:
+- informations user: id unique qui permet de créer un jeton uniquement valide pour ce client, personnel pour chaque user,
+- clef secrète pour renforcer la sécurité: afin de sécuriser le jeton, on utilise une clef secrète externe lors du cryptage du jeton. Cette clef se présente sous la forme d'une simple chaîne de caractères au sein de notre projet,
+- une date de validité pour le jeton: indiquer durée de validité du jeton. Lorsque le jeton est périmé, il ne peut plus être utilisé pour s'authentifer sur l'API REST.
+
+Création de la clef secrète: dossier auth avec fichier qui contient la clef.
+Il ne reste plus qu'à créer le jeton => endpoint loggin.js.
+
+### Vérification des jetons jwt
+
+Il faut ensuite sécuriser les échanges entre le client et l'API REST. Requête auprès d'un point de terminaison, il faut extraitre le jeton de l'en-tête de la requête et vérifié si valide ou non.
+Cela devra être fait pour chaque point de terminaison sauf celui de la connexion => middleware auth.js
+
+Voici comment le jeton JWT sera échangé entre le client et l'API REST:
+
+    authorization : Bearer <JWT>
+    exemple: authorization : Bearer Jdoihef5454r4ger
+Le jeton JWT de notre client sera échangé dans une en-tête HTTP nommée authorization avec pour valeur le nom arbitraire bearer espace le jeton en lui-même.
+Pour extraire le jeton d'un user, il faut retirer le terme Bearer avant l'espace qui sert de séparateur et récupèrer valeur du jeton uniquement.
+Il reste maintenant à sécuriser les endpoints avec le middleware.
+
+### Sécxuriser la lsite des pokemons
+
