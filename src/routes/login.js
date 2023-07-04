@@ -20,7 +20,7 @@ module.exports = (app) => {
             const message = 'Le mot de passe est invalide.'
             return res.status(401).json({message});
             }
-            // 401 car pas une ressourcequi n'a pas été trouvée mais un droit d'accès ko
+            // 401 car pas une ressource qui n'a pas été trouvée mais un droit d'accès ko
 
             // jwt
             const token = jwt.sign(

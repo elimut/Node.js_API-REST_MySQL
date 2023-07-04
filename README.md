@@ -930,7 +930,7 @@ Voir sequelize.js
 L'on dispose d'un mdp encrypté dans la bdd, mais n'a aucun moyen de s'authentifier sur l'API REST.
 Il faut implémenter un point de terminaison pour s'authentifier => endpoint authentification.
 
-loggin.js
+login.js
 
 ### Gérer les cas d'erreurs de la connexion
 
@@ -988,5 +988,10 @@ Le jeton JWT de notre client sera échangé dans une en-tête HTTP nommée autho
 Pour extraire le jeton d'un user, il faut retirer le terme Bearer avant l'espace qui sert de séparateur et récupèrer valeur du jeton uniquement.
 Il reste maintenant à sécuriser les endpoints avec le middleware.
 
-### Sécxuriser la lsite des pokemons
+### Sécuriser la liste des pokemons
+
+On doit laisser en libre service le endpoint de la connexion, il existe une solution pour appliquer un middleware sur certains endpoint avec Express.
+Application sur findAll.
+
+Chercher un jeton valide grâce au point de terminaison de la connexion, puis on l'utilisera pour récupèrer la liste de tout les pokemons.
 

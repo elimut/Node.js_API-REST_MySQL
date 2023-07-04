@@ -1,7 +1,9 @@
 const { Pokemon } = require('../db/sequelize')
+const auth = require("../auth/auth");
   
 module.exports = (app) => {
-  app.get('/api/pokemons', (req, res) => {
+  app.get('/api/pokemons', auth, (req, res) => {
+    // passer middleware auth en deuxième argument de la route pour sécurisation
     Pokemon.findAll()
       .then(pokemons => {
         const message = 'La liste des pokémons a bien été récupérée.'
