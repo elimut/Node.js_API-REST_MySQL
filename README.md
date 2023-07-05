@@ -862,6 +862,9 @@ le client s'est trompé, exemple demande ressource non existante. 401 => pas aut
 5XX => erreur serveur
 le serveur n'est pas en état de fournir une réponse au client
 
+### Déterminer les codes de statut à utiliser
+
+
 
 ## Sécurité et authentification avec JWT
 
