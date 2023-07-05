@@ -31,7 +31,7 @@ module.exports = (app) => {
             )
 
             const message = `L'utilisateur a été connecté avec succès`;
-            return res.json({ message, data: user, token })
+            return res.json({ message, data: user, token });
         // vérification mdp erroné
       })
     })
