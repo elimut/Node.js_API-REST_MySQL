@@ -32,7 +32,7 @@ Le navigateur contient un **moteur** jS pour interpréter JS, chaque navigateur 
 
 JS => moteur JS => appli web : Node.js pas dedans car côté naviagteur, Node.js = côté serveur (backend).
 
-**Node.js utilise JS donc mteur JS, ce moteur est inclus dans Node.js = V8 (open source).**
+**Node.js utilise JS donc mosteur JS, ce moteur est inclus dans Node.js = V8 (open source).**
 
 >Environnement web = navigateur + moteur js
 >Environnement serveur = Node.js + V8 + modules internes à JS, code JS côté serveur
@@ -684,7 +684,7 @@ Cet objet spécifique contient plusieurs propriétés qui décrivent à Sequeliz
 On déclare des objets avec certaines propriétes en js dans le code de l'PAI REST et Sequelize s'occupe du reste, il fournit la couche d'abstraction dont on a besoin.
 Nous devrons donner un nom à chaque models Sequelize que nous créerons.
 Exemple, un modèle pokemon afin de modéliser un pokemon. Sequelize va se baser sur ce nom et va lui ajouter la lettre s en suffixe pour déterminer le nom de la table.
-Ainsi, la table associée au pokemon se nommero => pokemons.
+Ainsi, la table associée au pokemon se nommera => pokemons.
 ![nom models](img/models_nom_table.png)
 Sequelize se contente de passer le nom au pluriel pour déterminer le nom d'une table.
 
@@ -864,6 +864,27 @@ le serveur n'est pas en état de fournir une réponse au client
 
 ### Déterminer les codes de statut à utiliser
 
+Il existe plus de 70 codes de statut disponible.
+Créer un sous ensemble de code de statut plus réduit.
+Trois résultats possibles entre une intéraction entre une application et une API REST:
+- 200: tout a fonctionné, et retour d'une réponse valide,
+- 400: lorsque le client a fait quelque chose de mal, exemple corps de la requête invalide, ou ressource non existante,
+- 500: serveur et API REST incapable de retourner une réponse.
+
+Les codes de statut 4XX = erreurs clients!
+Il fait donc indiquer au client comment rectifier sa demande.
+
+>400: erreur générale, exemple n'a pas envoyé les bonnes données. 
+404: client demande une ressource non existante.
+401: demande d'une ressource sans droits suffisants.
+403: si 'lutilisateur s'est bien authentifié mais demande une ressource non autorisée (cas de deux rôles par exemple).
+
+### Gérer l'erreur classique 404
+
+Page not found.
+
+Express a déjà mis en place quelque chose, car retour si URL erronée , d'une erreur 404, mais reste peu satisfaisant.
+Création du propre point de terminaison dédié aux erreurs 404.
 
 
 ## Sécurité et authentification avec JWT
