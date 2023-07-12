@@ -5,11 +5,16 @@ module.exports = (app) => {
   app.get('/api/pokemons', auth, (req, res) => {
     // passer middleware auth en deuxième argument de la route pour sécurisation
     Pokemon.findAll()
+    // findAll retourne une promesse = requête que Sequelize va effectuer à la bdd => échoue ou réussit
       .then(pokemons => {
         const message = 'La liste des pokémons a bien été récupérée.'
-        res.json({ message, data: pokemons })
+        res.json({ message, data: pokemons });
       })
-      .catch(error => console.log(error));
+      .catch(error => {
+        const message = "La liste des pokémons n'a pas pu être chargée. Réessayez dans quelques instants.";
+        res.status(500).json({ message, data: error});
+      });
+      // interception des erreurs avec la méthode catch des promesses de JS. Une fois capturée il reste à retourner un message d'erreur 
   })
 }
 // définition d'un point de terminaison complet dans son propre module js

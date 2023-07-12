@@ -107,7 +107,7 @@ node.green => liste toute les fonctionnalités de JS et indique si elles sont di
 
 TypeScript est un langage open source développé par Microsoft et permet d'ajouter le typage au langage JS.
 Permet d'indiquer si une variable est de tel type, telle fonction doit renvoyer tel ou tel type.
-Plus pertinenet côté front, permet de structurer l'état de la donnée.
+Plus pertinent côté front, permet de structurer l'état de la donnée.
 
 Nouvelle façon d'utiliser JS en dehors d'un navigateur pour développer toutes sortes d'application.
 
@@ -874,33 +874,53 @@ Trois résultats possibles entre une intéraction entre une application et une A
 Les codes de statut 4XX = erreurs clients!
 Il fait donc indiquer au client comment rectifier sa demande.
 
->400: erreur générale, exemple n'a pas envoyé les bonnes données. 
+400: erreur générale, exemple n'a pas envoyé les bonnes données. 
 404: client demande une ressource non existante.
 401: demande d'une ressource sans droits suffisants.
-403: si 'lutilisateur s'est bien authentifié mais demande une ressource non autorisée (cas de deux rôles par exemple).
+403: si l'utilisateur s'est bien authentifié mais demande une ressource non autorisée (cas de deux rôles par exemple).
 
 ### Gérer l'erreur classique 404
 
 Page not found.
 
 Express a déjà mis en place quelque chose, car retour si URL erronée , d'une erreur 404, mais reste peu satisfaisant.
-Création du propre point de terminaison dédié aux erreurs 404.
+=> Création du propre point de terminaison dédié aux erreurs 404.
+Dans express, 404 pas le résultats d'une erreur en soi, mais simplement le fait d'une absence de traitement. On en peut donc pas le mécansime de middleare interne à express concernant la gestion d'erreurs.
+Express tente d'exécuter toutes les routes déclarées mais aucune ne répond => fonction de middleware à la suite de la déclaration de nos routes dans app.js.
+
+### Mettre en place les erreurs sur la liste des pokemons
+
+Gestion de toutes les erreurs éventuelles sur les endpoints existants.
+pas de 200? => par défaut dans express.
+Si liste vide? possible mais si demande un id non existant erreur 404.
+
+### Ajouter la gestion d'erreurs pour récupèrer un pokémon
+
+Voir findPokemon.js
+
+### Traiter les erreurs lors de l'ajout d'un pokémon
+
+
+
+
 
 
 ## Sécurité et authentification avec JWT
 
 ## Présentation de l'authentification
 
-N'importe quel consommateur eut consulter ou modifier nos pokemons depuis l'API REST.
+N'importe quel consommateur peut consulter ou modifier nos pokemons depuis l'API REST.
 Il faut demander une authentification avant l'intéraction.
 Il faut un point de terminaison dédié à la tâche de connexion, son rôle sera de demander aux utilisateurs de s'authentifier grâce à un id etun mdp.
 Il faut respecter deux exigences principales => encrypter le mdp, dans une API REST il faut garder les données sur le long terme et certaines sont sensibles.
 Puis sécuriser échanges des données, l'user doit pouvoir consommer les points de terminaison en toute sécurité.
+
 ### Créer un modèle pour l'utilisateur
 
 Comparaison les id externes envoyés à l'API REST par le consommateur avec ceux déjà présents en bdd.
 
 => création d'un models Sequelize user pour modéliser un user dans l'API REST.
+
 ### Ajouter une contrainte d'unicité
 
 Il manque une règle de validation primordiale pour l'authentification:
@@ -1019,3 +1039,7 @@ Application sur findAll.
 
 Chercher un jeton valide grâce au point de terminaison de la connexion, puis on l'utilisera pour récupèrer la liste de tout les pokemons.
 
+## Sources
+
+[sync](https://www.pierre-giraud.com/javascript-apprendre-coder-cours/introduction-asynchrone/)
+[tuto](https://www.udemy.com/course/nodejs-tutorial-francais-express-api-rest-mysql/learn/lecture/23372206#overview)

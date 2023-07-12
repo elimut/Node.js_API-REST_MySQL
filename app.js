@@ -66,6 +66,12 @@ require('./src/routes/login')(app);
 // app.use(morgan('dev'));
 //attacher middleware dans l'API REST avec express, on peut paramètrer le message affiché
 
+// ajout de la gestion des erreurs: express intercepte toutes les demandes du client qui ne correspondent pas à une route déclarée précedemment.
+app.use(({res}) => {
+    const message = "Impossible de trouver la ressource demandée! Vous pouvez essayer une autre URL.";
+    res.status(404).json({message});
+    // méthode status d'express pour définir un statut à notre réponse. param code statut HTTP à retourner à nos clients. endpoint qui n'existent pas
+})
 
 app.listen(port, () => console.log(`Notre appli Node est démarrée sur : http://localhost: ${port}`));
 // démarre API REST sur port 3000
