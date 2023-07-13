@@ -82,3 +82,4 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2023-07-12 11:02:37
+insert into pokemons values (16"anneso", 30, 30, "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/025.png", "anne, so", "2023-07-13");

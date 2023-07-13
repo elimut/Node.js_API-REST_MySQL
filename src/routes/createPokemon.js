@@ -1,12 +1,20 @@
-const { Pokemon } = require('../db/sequelize')
+const { Pokemon } = require('../db/sequelize');
+const { ValidationError } = require('sequelize');
   
 module.exports = (app) => {
   app.post('/api/pokemons', (req, res) => {
     Pokemon.create(req.body)
       .then(pokemon => {
-        const message = `Le pokémon ${req.body.name} a bien été crée.`
-        res.json({ message, data: pokemon })
+        const message = `Le pokémon ${req.body.name} a bien été crée.`;
+        res.json({ message, data: pokemon });
       })
-      .catch(error => console.log(error));
-  })
+      .catch(error => {
+        if(error instanceof ValidationError) {
+          return res.status(400).json({ message: error.message, data: error});
+        }
+        // erreur de validation (voir models) => retour erreur 400. Le msg d'erreur défini au niveau du validateur directement dans l'erreur envoyé au client grâce à error.message et tout reste centralisé au niveau du models
+        const message = "Le pokémon n'a pas pu être ajouté. Réessayez dans quelques instants.";
+        res.status(500).json({ message, data: error});
+      });
+  });
 }

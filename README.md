@@ -118,7 +118,7 @@ Récupèrer le fichier d'installqtion => nodejs.org/fr, il existe deux versions:
 - La version actuelle, soit la dernière version actuelle. Pratique pour tester les fonctionnalités mais peut êttre adapatable.
 
 Installation de deux outils:
-installation de Node.js, et NPM( node package manager) qui permet d'installer et gèrer les paquets JS (exemple: Express.js).
+installation de Node.js, et NPM(node package manager) qui permet d'installer et gèrer les paquets JS (exemple: Express.js).
 
 ## Démarrer un projet Node.js
 
@@ -900,10 +900,139 @@ Voir findPokemon.js
 
 ### Traiter les erreurs lors de l'ajout d'un pokémon
 
+createPokemon.js
+Dans ce cas, il y a les données clients, elles peuvent contenir des erreurs comme le nombre de types.
+Il faudrait définir différentes **validations métiers** pour chacune des propriétés de notre modèle Pokémon.
+Sequelize permet de faire cela simplement => pas d'erreurs techniques en tant que telles, mais d'erreurs métiers par rapport aux besoins spécifiques de notre application Pokémon.
+Gérer les échecs de connexion à la base de données qui peuvent survenir dans n'importe quelle API REST est différent que de définir des règles de validation sur nos Pokémons.
+Ce sont deux domaines séparés.
+
+### Anticiper les erreurs lors de la modification d'un pokemon
+
+updatePokemon.js
+=> deux erreurs 500 possibles: update et findByPk, erreurs qui peuvent survenir indépendamment l'une de l'autre.
+Puis findByPk => aucun pokémon en bdd.
+Validations métiers, car le cleitn envoie des données pour effectuer la modification d'un pokémon.
+
+    module.exports = (app) => {
+    app.put('/api/pokemons/:id', (req, res) => {
+        const id = req.params.id;
+        Pokemon.update(req.body, {
+        where: { id: id }
+        })
+        .then(_ => {
+        Pokemon.findByPk(id).then(pokemon => {
+            if(pokemon === null) {
+            const message = "Le pokémon demandé n'existe pas. Réessayez avec un autre identifiant";
+            return res.status(404).json({ message });
+            }
+            const message = `Le pokémon ${pokemon.name} a bien été modifié.`
+            res.json({message, data: pokemon })
+        })
+        .catch(error => {
+            const message = "Le pokémon n\'a pas pu être modfié. Réessayez dans quelques instants.";
+            return res.status(500).json({ message, data: error});
+        });
+        })
+        .catch(error => {
+        const message = "Le pokémon n\'a pas pu être modfié. Réessayez dans quelques instants.";
+        return res.status(500).json({ message, data: error});
+        });
+    });
+    }
+    => duplication erreur 500, il faut factoriser le traitement.
+Erreur 500 pour update ou findByPk, il faudrait la transmettre dans le dernier bloc catch. Cela est possible avec les promesses JS, on peut transmettre une promesse contenue dans un bloc then au bloc catch suivant en cas d'erreur.
+Il faut utiliser return et se rappeler que la méthode findByPk de Sequelize retourne une promesse. L'on peut donc factoriser le traitement des erreurs 500 dans le endpoint.
+
+### Réagir aux erreurs durant la suppression d'un pokémon
+
+deletePokmon.js
+erreur 500 si requête échoue auprès de la bdd.
+404 si pokémon inconnu.
+Utilisateur vadeamndr la suppression d'un pokémon => confirmation suppression, 404 si demande à le supprimer de nouveau.
+
+## La validation métier 
+
+### Différence entre validateurs et contraintes
+
+Pour définir des règles de validation métier sur les pokémons, nous allons devoir utiliser le mécanisme des validateurs et des contraintes proposées pas Sequelize.
+Erreurs techniques: erreurs retrouvée partout peut importe l'API REST. Accès bdd, ou ressource inecistante.
+**Erreurs métiers**: erreurs spécifiques aux fonctionnement de notre API REST. Exemple: modification d'un nom en caractères spéciaux, demande de modification en chaîne de caratcère pourquoi lui refuser cette modification.
+
+Sequelize distingue deux cas lors de la validation d'un models:
+- **validateurs**: chargés d'effectuer la validation des models au niveau du code JS pur. Il existe plusieurs validateurs intégrés pas Sequelize, mais l'on peut les créer. Si la validation échoue dans le code JS, Sequelize n'enverra aucune requête à la BDD.
+- **contraintes**: ce sont les règles définies directement au niveau de la BDD. Exemple avoir un nom unique, chose impossible côté code js. Il est donc possible de définir des règles grâce aux contraintes de Sequelize. Dans ce cas, que la contrainte soit respectée ou non la requête SQL sera envoyée en BDD par Sequelize.
+
+En passant pas les validateurs, on évite d'interroger la BDD inutilement. La réponse est plus rapide car pas de requête.
+
+### La validation par défaut avec Sequelize
+
+Avant de mettre en place de nouvelles règles de validation, nous allons réliser un état des lieux du models pokemon existant.
+Pour chaque propriétés du modèle pokemon.js nous avons déjà certaines informations.
+Chaque champ contient déjà au mois deux informations: un type et le fait qu'il ne peut pas contenir la valeur null (chaîne de caractère vide != null).
+Forçons les règles de validations déjà en place: modification d'un pokemon déjà existant en définissant modificatoion d'un pokémon existant en définissant une chaîne de caractères pour les pv au lieu d'une châine de caractères => Sequelize database error, 500.
+null => 500, SequelizeValidationError.
+Sequelize lève des erreurs mais non satisfaisantes => erreurs 500 or c'est le client qui envoie les mauvaises données doit être une erreur 400.
+Il faut utiliser un validateur pour empêcher la requête et retourner une réponse plus rapidement.
+Type et propriété allowNull correspondent en réalité à des instructions nécessaires pour synchroniser la BDD SQL.
+Il faut donc faire des réponses HTTP.
+
+**Propriété allowNull est un cas spécial dans Sequelize car est à la fois un validateur JS et une contrainte dans la BDD.**
+
+### Définir un validateur Sequelize
+
+**Il faut vérifier le type de propriété du models pokemon ainsi que la non nullité des valeurs transmises => validateurs intégrés de base dans Sequelize.**
+Les validateurs doivent être attachés à un modèle Sequlize existant, et permettent d'affiner chaque prorpiété de ce dernier. Ils sont ensuite automatiquement déclenchés lorsque l'on fait appel aux méthodes create ou update => garantir la cohérence des données stockées.
+Pour mettre en place facilement des règles de validation, Sequelize nous propose une grande liste de validateurs prêts à l'emploi: isInt, isEmail, isUrl, notNull, ...
+
+Mise en place du type et non nuliité des pv pour le models pokemon.js.
+
+  hp: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: {
+          isInt: { msg: "utilisez uniquement des nombres entiers."},
+          notNull: {msg: "Les points de vie sont une propriété requise."}
+          // déf de deux validateurs pour vérifier que le champ des points de vie est bien un nombre entier et le champ des pv n'est pas null grâce au validateur notNull avec message spécifique pour chaque validateur 
+        }
+      }
+Mais toujours en erreur 500 => erreur 400 car données incorrectes et modification à effectuer. C'est Sequelize qui lève une erreur et retourne ce message d'erreur définie au niveau des validateurs. Mais l'on peut personnaliser ce comportement dans la gestion d'erreurs.
+Dans createPokemon.js => mise en place d'un traitement spécifique pour les erreurs de validation du models.
+
+### Définir des règles de validation basiques
+
+Exercice:
+Définir les validateurs pour les types et non nullité des autres propriétés du models pokémon.
+- name: isEmpty et notNull, **attention chaîne de caractère vide ok => autre validateur notEmpty** (notEmpty: true, // don't allow empty strings)
+- cp: isInt et notNull,
+- picture: isUrl et notNull.
+- Le champ type comporte des setter et des guetter, et sa structure de données est légérement différente car est un tableau.
+
+### Ajouter des règles métiers
+
+Exercice:
+Ajout des règles métiers pour les propriétés restantes du models pokémon.
+- hp: champ requis, nombre entre 0 et 999,
+- cp: champ requis, nombre entre 0 et 999.
+=> **validateurs min et max**
+
+### Créer un validateur personnalisé
 
 
+Pour le moment, l'on a utilisé les validateurs natifs de Sequelize.
+Cependant pour certains cas plus avancés, comme la validation des types d'un pokémon, on ne peut plus se baser dessus, car limités.
+On peut donc en développer un personnalisé.
 
+types pokémon:
+- un pokémon devra avoir entre 1 et 3 types seulement,
+- appartenir à une liste prédéfinies, les types sont strictes.
+ 
+Création d'un validateur pour commencer la vérification du nombre de types autorisés:
+isTypesValid dans pokemon.js
 
+Pour les valeurs envoyées:
+on va restreindre les types pouvant être utilisés grâce à une liste prédéfinie directement dans le code.
+pokemon.js, ajout nouvelle variable contenant tout les types autorisés pour les pokémons au dessus de la déclaration du models.
 
 ## Sécurité et authentification avec JWT
 
