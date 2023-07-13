@@ -28,7 +28,7 @@ const initDb = () => {
         // types: pokemon.types.join()
         // retrait join() suite mise en place setter voir models
         types: pokemon.types
-      }).then(pokemon => console.log(pokemon.toJSON()))
+      }).then(pokemon => console.log(pokemon.toJSON()));
     })
 
     bcrypt.hash('pikachu', 10)
@@ -39,9 +39,9 @@ const initDb = () => {
         username: 'pikachu',
         password: hash
         // on pousse en bdd le mdp hashé et pas celui en clair
-      }).then(user => console.log(user.toJSON()))
+      }).then(user => console.log(user.toJSON()));
     })
-    console.log('La base de donnée a bien été initialisée !')
+    console.log('La base de donnée a bien été initialisée !');
   })
 }
 // initialisation du models
