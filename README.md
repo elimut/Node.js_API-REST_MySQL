@@ -1090,14 +1090,71 @@ Il n'est possible de récupèrer qu'un résultat à la fois, et le terme de rech
 
 ### Utiliser un opérateur Sequelize
 
- Sequelize nous impose une recherche stricte via la méthode findAll et la caluse where.
+ Sequelize nous impose une recherche stricte via la méthode findAll et la clause where.
  On peut passer outre cette recherche avec des mécanismes de recherche de données plus avancées.
  **Opérateurs** Sequelize pour mettre en place ce genre de requête.
 
+### Rechercher avec l'opérateur like
 
+Requête de recherche => uniquement les résultats nécessaires, et non une liste ou un unique résultat.
+Liste de suggestion correspondant au terme de recherche.
+On va vérifier si le terme de recherche est contenu dans le nom du pokémon, plus souple => **like**.
 
+    ${name}%
+    Recherche du nom commençant par le terme de la recherche
 
-### Présentation des paramèr=tres de requêtes
+    %${name}
+    Recherche du nom qui se termine par le terme de la recherche
+
+    %${name}%
+    Recherche du nom qui contient le terme de la recherche
+
+Like permet de chercher à tel ou tel endroit dans la propriété de nos models.
+
+### Limiter le nombre de résultats
+
+Amélioration:
+limiter le nombre de résultats => indiquer un seuil maximum à Sequelize dans la requête  de recherche.
+
+http://localhost:3000/api/pokemons?name=a
+
+### Calculer le nombre total de résultats
+
+Le consommateur peut avoir besoin de connaître le nombre de résultats, même si on lui retourne une liste limitée de pokémons.
+
+Exemple:
+l'utilisateur affiche une liste importante de pokémon, mais il n'ne affiche que 20 à la fois, avec un système de **pagination** juste en dessous.
+Dans ce cas, on a besoin d'afficher deux éléments distincts:
+- les données des 20 premiers pokémons,
+- le nombre total de pokémon disponible en base de données.
+=> 100 pokémon en BDD, l'on pourra calculer le nombre de pages nécessaires pour afficher l'ensemble des pokémons, avec 20 pokémons par page et 100 résultats au total: affichage des pages 1 à 5 aux visiteurs de son site.
+Pour implémenter cette fonctionnalité, Sequelize nous propose la méthode **findAndCountAll** => cette méthode retourne un nombre limité de résultats et également le nombre total de résultats disponible sans limite.
+findAllPokemon.js
+
+### Ordonner les résultats
+
+Tri les résultats par ordre alphabétique croissant. Il faut bien ordonner les résultats.
+Deux cas à gérer:
+liste complète des pokémons, on renvoie ce qu'il demande.
+
+    ['name'] ou ['name', 'ASC']  croissant
+    ['name', 'DESC'] décroissant
+    
+### Exercice: limiter les résultats dynamiquement
+
+Le consommateur de l'API puisse déterminer dynamiquement le nombre de résultats de recherche qu'il souhaite afficher via un paramètre de requête.
+
+    mon-site.com/api/pokemons?limit=5
+
+On a déjà limité le nombre de résultat en dur, il ne reste qu'à relier le paramètre de requête limité à la requête effectuée par Sequelize.
+
+1- inspecter le paramètre de requête limit, s'il n'existe pas la valeur par défaut sera 5,
+2- la requête de recherche devra prendre ne compte la limite déterminée par l'utilisateur.
+
+### Exercice: exécuter seulement les requêtes pertinentes
+
+Pour économisezr les ressources du backend en empêchant les requêtes inutiles à la BDD.
+Bloquer les requêtes composées d'une lettre.
 
 
 ## Sécurité et authentification avec JWT

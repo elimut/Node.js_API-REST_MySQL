@@ -1,21 +1,52 @@
 const { Pokemon } = require('../db/sequelize')
 const auth = require("../auth/auth");
+const { Op } = require('sequelize');
   
 module.exports = (app) => {
-  app.get('/api/pokemons',auth ,(req, res) => {
+  app.get('/api/pokemons' ,(req, res) => {
     // passer middleware auth en deuxième argument de la route pour sécurisation
     if(req.query.name) {
       const name = req.query.name;
+      // const limitUser = parseInt(req.query.limit);
+      // (limitUser != 5)? limitUser : limitUser = 5;
+
+      if(name.length < 2){
+        const message = "Le terme de la recherche doit contenir au moins deux caractères. Réessayez.";
+        res.status(400).json({ message});
+      }
+      const limitUser = parseInt(req.query.limit) || 5; //tuto, vérifier ternaire
       // req.query.name => indique à express que l'on souhaite extraire le paramètre de requête name del'URL. On passe par la requête req fournie par Express.
-      return Pokemon.findAll({ where: { name: name}})
-      // clause where en param de la méthode findAll de Sequelize, cette méthode estune fonctionnalité puissante proposée par Sequelize pour récup des données dans la BDD. Grâce à elle on peut trier les ressources en fonction de telles ou telles critères. rquête sur mesure. 
-      // if pour séparer  deux cas disctincts dans le endpoint: recherche d'un Pokémon si oui alors le paramètre de requête name exite sinon il veut la liste.
-      .then(pokemons => {
-        const message =  (pokemons.length > 1)? `Il y a ${pokemons.length} qui correspondent au terme de recherche ${name}` : `Il y a ${pokemons.length} qui correspond au terme de recherche ${name}` ;
-        res.json({ message, data: pokemons});
+      // return Pokemon.findAll({ where: { 
+      //   name: { //name est la propriété du models pokemon
+      //     // [Op.eql]: name //name est le critère de la recherche
+      //     // opérateur Op.eql. Paritcularité de syntaxe, il faut importer les op de sequelize que l'on souhaite utiliser. crochet autour de l'op: obligation arbitraire de Sequelize.
+      //     [Op.like]: `%${name}%` 
+      //     // % pour indiquer où effectuer la recherche dans le nom d'un pokémon
+      //   }
+      // },
+      // limit: 5
+        // limite de résultats
+      return Pokemon.findAndCountAll({ where: { 
+        // va chercher 2 infos en bdd: nombre total et résultats demandés
+        name: { 
+          [Op.like]: `%${name}%` 
+        }
+      },
+      order: ['name'],
+      // nous passons un tableau contenant deux informations: la prop du models Sequelize, sur laquelle on souhaite ordonner les résultats et l'ordre croissant ou décroissant, par défaut croissant
+      limit: limitUser
+    })
+      // .then(pokemons => {
+      //   const message =  (pokemons.length > 1)? `Il y a ${pokemons.length} pokémon qui correspondent au terme de recherche ${name}` : `Il y a ${pokemons.length} pokémon qui correspond au terme de recherche ${name}` ;
+      //   res.json({ message, data: pokemons});
+      // });
+      .then(({count, rows}) => {
+        const message =  `Il ya ${count} pokémons qui correpondent au terme de la recherche ${name}`;
+        res.json({ message, data: rows});
       });
+      // on récupère les deux informations retournées par la méthode. Paramètres imposés par findAndCountAll, on récupère donc les var count et rows à la place de pokémons.
     }
-    Pokemon.findAll()
+    Pokemon.findAll({ order: ['name'] })
     // findAll retourne une promesse = requête que Sequelize va effectuer à la bdd => échoue ou réussit
       .then(pokemons => {
         const message = 'La liste des pokémons a bien été récupérée.'
