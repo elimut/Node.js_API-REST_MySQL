@@ -1033,6 +1033,72 @@ isTypesValid dans pokemon.js
 Pour les valeurs envoyées:
 on va restreindre les types pouvant être utilisés grâce à une liste prédéfinie directement dans le code.
 pokemon.js, ajout nouvelle variable contenant tout les types autorisés pour les pokémons au dessus de la déclaration du models.
+Siun seul type n'est pas correct => erreur!
+Préservation de l'intégrité des données.
+
+On est obligé de réappliquer le traitement du getter avec la méthode split() car Sequelize nous transmet la valeur brute aux niveaux des validateurs personnalisés = c'est à dire la donnée qui vient directement de la base de données SQL.
+
+### Implémenter une contrainte
+
+Les contraintes de Sequelize:
+mécanisme permettant de définir des règles côté SQL plutôt qu'au niveau du code JS.
+Lorsque l'on utilise un validateur, Sequelize effectue la vérification au niveau du code de notre API REST et est capable debloquer les requêtes vers notre BDD. En utilisant des contraintes, les requêtes vers notre BDD sont sytématiquement exécutées par Sequelize et SQL peut rejeter ou non la demande et ensuite Sequleize nous nforme de ce qui s'est passé.
+
+Dans l'idéal, on utiliserait que des validateurs. Cependant, il arrive parfois que l'on ait pas le choix et qu'il faille obligatoirement passer par des contraintes SQL.
+Exemple: définir une contrainte d'unicité. Nom de chaque Pokemon unique en BDD => contrainte Sequelize car un validateur ne peut pas suffir car il est impossible de savoir au niveau de l'API REST si tel nom est disponible ou pas.
+Contrainte d'unicité fournie par Sequelize que nous devons ajouter au niveau du models pokemon.js.
+Contrairement au validateur, il est nécessaire de resynchroniser la BDD.
+Il manque la gestion des erreurs => 400, on va intercepter l'erreur nommée Sequelize Uniq Constraint Error => endpoint create et update.
+## Les requêtes avancées
+
+Pour le moment nous ne récuperons qu'un ou la liste des pokémons, mais cela ne suffit pas.
+Exemple, recherche par son nom ou ne récupèrer que les 5 derniers, ...
+Comment améliorer les endpoints existants => **concept disponible avec le protocole HTTP = Query Params ou paramètres de requête**.
+
+mon-site.com/api/pokemons?name="Bulbizarre"
+mon-site.com/api/pokemons?limit=5
+mon-site.com/api/pokemons?orderBy=name
+
+=> paramètres ajoutés à la fin d'une URL dans les endpoints.
+Pourquoi des query plutôt que des paramètres dans l'URL?
+
+### Paramètres d'URL ou de requêtes?
+
+Que doit on utiliser dans notre API REST?
+
+Meilleure façon de structurer l'API REST est de respecter les deux règles suivantes:
+- **les paramètres d'URL doivent être utilisés pour identifeir une ressource spécifique**,
+- **les paramètres de requête sont utilisés pour trier ou filtrer ces ressources**.
+
+Exemple: API REST avec des endpoint gérant des voitures:
+GET /cars
+GET /cars:id
+POST /cars
+PUT /cars:id
+DELETE /cars:id
+=> endpoints spécification de la ressource souhaitée mais pas de tri ou filtre, la couleur d'une voiture n'est pas une ressource en soi c'est une propriété de la ressorce voiture.
+Il faut donc ajouter un paramètre de requête qui va s'occuper du filtrage des voitures: GET /cars?color=blue
+
+Pour les URL, il existe une autre bonne pratique: en **minuscule** et **si nom composé, il faut utiliser un trait d'union**.
+
+### Ajouter une fonctionnalité de recherche
+
+Recherche d'un pokémon par son nom, le nom saisi doit être exact.
+GET /api/pokemons?name=Bulbizarre
+findAll.js 
+Il n'est possible de récupèrer qu'un résultat à la fois, et le terme de recherche doit être exact.
+
+### Utiliser un opérateur Sequelize
+
+ Sequelize nous impose une recherche stricte via la méthode findAll et la caluse where.
+ On peut passer outre cette recherche avec des mécanismes de recherche de données plus avancées.
+ **Opérateurs** Sequelize pour mettre en place ce genre de requête.
+
+
+
+
+### Présentation des paramèr=tres de requêtes
+
 
 ## Sécurité et authentification avec JWT
 
@@ -1053,7 +1119,7 @@ Comparaison les id externes envoyés à l'API REST par le consommateur avec ceux
 ### Ajouter une contrainte d'unicité
 
 Il manque une règle de validation primordiale pour l'authentification:
-- **l'id doit être unique, mail ou pseudo => doit être unique!**
+- **l'id doit être uniq ue, mail ou pseudo => doit être unique!**
 _ un mot de passe.
 
 L'unicité est garantie grâce à une contrainte de Sequelize.

@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
         // facultatif ou non?
+        unique: {
+          msg: `Le nom est déjà pris`
+        },
+        // contrainte d'unicité
         validate: {
           notEmpty: { msg: "Le nom ne peut pas être vide."},
           notNull: {msg: "Le nom est une propriété requise."}
@@ -77,7 +81,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         validate: {
           isTypesValid(value) {
-            // définition d'une fonction isTypesValid => validateur avec un nom arbitraire que l'on a donné. Prend en pramètre la valeur value = valeur de la propriété types contenue en BDD sans prendre en compte le getter ou le setter de la propriété, on reçoit une valeur de typer x, y sous la forme de la chaîne de caractère et non sous forme d'un tableau.
+            // définition d'une fonction isTypesValid => validateur avec un nom arbitraire que l'on a donné. Prend en pramètre la valeur value = valeur de la propriété types contenue en BDD sans prendre en compte le getter ou le setter de la propriété, on reçoit une valeur de typer x, y sous la forme de la chaîne de caractère et non sous forme d'un tableau.  
             if(!value) {
               throw new Error("Un pokémon doit avoir au moins un type.");
               // levée de l'erreur avec throw new Error
@@ -89,6 +93,7 @@ module.exports = (sequelize, DataTypes) => {
               if(!validTypes.includes(type)) {
                 throw new Error(`Le type d\'un pokémon doit appartenir à la liste suivante: ${validTypes}`);
               }
+            // On est obligé de réappliquer le traitement du getter avec la méthode split() car Sequelize nous transmet la valeur brute aux niveaux des validateurs personnalisés = c'est à dire la donnée qui vient directement de la base de données SQL.
             });
           }
         }

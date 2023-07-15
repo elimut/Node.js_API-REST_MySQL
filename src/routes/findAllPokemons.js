@@ -2,8 +2,19 @@ const { Pokemon } = require('../db/sequelize')
 const auth = require("../auth/auth");
   
 module.exports = (app) => {
-  app.get('/api/pokemons', auth, (req, res) => {
+  app.get('/api/pokemons',auth ,(req, res) => {
     // passer middleware auth en deuxième argument de la route pour sécurisation
+    if(req.query.name) {
+      const name = req.query.name;
+      // req.query.name => indique à express que l'on souhaite extraire le paramètre de requête name del'URL. On passe par la requête req fournie par Express.
+      return Pokemon.findAll({ where: { name: name}})
+      // clause where en param de la méthode findAll de Sequelize, cette méthode estune fonctionnalité puissante proposée par Sequelize pour récup des données dans la BDD. Grâce à elle on peut trier les ressources en fonction de telles ou telles critères. rquête sur mesure. 
+      // if pour séparer  deux cas disctincts dans le endpoint: recherche d'un Pokémon si oui alors le paramètre de requête name exite sinon il veut la liste.
+      .then(pokemons => {
+        const message =  (pokemons.length > 1)? `Il y a ${pokemons.length} qui correspondent au terme de recherche ${name}` : `Il y a ${pokemons.length} qui correspond au terme de recherche ${name}` ;
+        res.json({ message, data: pokemons});
+      });
+    }
     Pokemon.findAll()
     // findAll retourne une promesse = requête que Sequelize va effectuer à la bdd => échoue ou réussit
       .then(pokemons => {

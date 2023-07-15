@@ -1,8 +1,9 @@
 const { Pokemon } = require('../db/sequelize');
-const { ValidationError } = require('sequelize');
-  
+const { ValidationError, UniqueConstraintError } = require('sequelize');
+const auth = require("../auth/auth");
+    
 module.exports = (app) => {
-  app.post('/api/pokemons', (req, res) => {
+  app.post('/api/pokemons',auth, (req, res) => {
     Pokemon.create(req.body)
       .then(pokemon => {
         const message = `Le pokémon ${req.body.name} a bien été crée.`;
@@ -10,6 +11,9 @@ module.exports = (app) => {
       })
       .catch(error => {
         if(error instanceof ValidationError) {
+          return res.status(400).json({ message: error.message, data: error});
+        }
+        if(error instanceof UniqueConstraintError) {
           return res.status(400).json({ message: error.message, data: error});
         }
         // erreur de validation (voir models) => retour erreur 400. Le msg d'erreur défini au niveau du validateur directement dans l'erreur envoyé au client grâce à error.message et tout reste centralisé au niveau du models
