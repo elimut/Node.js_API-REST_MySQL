@@ -3,18 +3,18 @@ const auth = require("../auth/auth");
 const { Op } = require('sequelize');
   
 module.exports = (app) => {
-  app.get('/api/pokemons' ,(req, res) => {
+  app.get('/api/pokemons',auth ,(req, res) => {
     // passer middleware auth en deuxième argument de la route pour sécurisation
     if(req.query.name) {
       const name = req.query.name;
       // const limitUser = parseInt(req.query.limit);
       // (limitUser != 5)? limitUser : limitUser = 5;
+      const limitUser = parseInt(req.query.limit) || 5; //tuto, vérifier ternaire
 
       if(name.length < 2){
         const message = "Le terme de la recherche doit contenir au moins deux caractères. Réessayez.";
-        res.status(400).json({ message});
+        return res.status(400).json({ message});
       }
-      const limitUser = parseInt(req.query.limit) || 5; //tuto, vérifier ternaire
       // req.query.name => indique à express que l'on souhaite extraire le paramètre de requête name del'URL. On passe par la requête req fournie par Express.
       // return Pokemon.findAll({ where: { 
       //   name: { //name est la propriété du models pokemon
@@ -26,16 +26,18 @@ module.exports = (app) => {
       // },
       // limit: 5
         // limite de résultats
-      return Pokemon.findAndCountAll({ where: { 
+
+      return Pokemon.findAndCountAll({ 
+        where: { 
         // va chercher 2 infos en bdd: nombre total et résultats demandés
-        name: { 
-          [Op.like]: `%${name}%` 
-        }
-      },
-      order: ['name'],
-      // nous passons un tableau contenant deux informations: la prop du models Sequelize, sur laquelle on souhaite ordonner les résultats et l'ordre croissant ou décroissant, par défaut croissant
-      limit: limitUser
-    })
+          name: { 
+            [Op.like]: `%${name}%` 
+          }
+        },
+        order: ['name'],
+        // nous passons un tableau contenant deux informations: la prop du models Sequelize, sur laquelle on souhaite ordonner les résultats et l'ordre croissant ou décroissant, par défaut croissant
+        limit: limitUser
+      })
       // .then(pokemons => {
       //   const message =  (pokemons.length > 1)? `Il y a ${pokemons.length} pokémon qui correspondent au terme de recherche ${name}` : `Il y a ${pokemons.length} pokémon qui correspond au terme de recherche ${name}` ;
       //   res.json({ message, data: pokemons});
@@ -43,9 +45,9 @@ module.exports = (app) => {
       .then(({count, rows}) => {
         const message =  `Il ya ${count} pokémons qui correpondent au terme de la recherche ${name}`;
         res.json({ message, data: rows});
-      });
+      })
       // on récupère les deux informations retournées par la méthode. Paramètres imposés par findAndCountAll, on récupère donc les var count et rows à la place de pokémons.
-    }
+    } else {
     Pokemon.findAll({ order: ['name'] })
     // findAll retourne une promesse = requête que Sequelize va effectuer à la bdd => échoue ou réussit
       .then(pokemons => {
@@ -57,6 +59,7 @@ module.exports = (app) => {
         res.status(500).json({ message, data: error});
       });
       // interception des erreurs avec la méthode catch des promesses de JS. Une fois capturée il reste à retourner un message d'erreur 
+    }
   })
 }
 // définition d'un point de terminaison complet dans son propre module js
