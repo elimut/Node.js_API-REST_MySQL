@@ -1355,7 +1355,77 @@ Pour savoir ce qui est permis ou non les serveurs respectent un processus quyi v
 ![CORS](img/CORS.png)
 
 Vérification de l'origine du client, puis communique au navigateur web le type de requête est autorisée.
-Dans le cas d'une requête complexe, une requête  de contrôle **pre-flight** est effectuée grâce à l'entête **options**. Cette requeête de pre-flight a pour objecti de déterminer si la demande est sûre ou non.
+Dans le cas d'une requête complexe, une requête  de contrôle **pre-flight** est effectuée grâce à l'entête **options**. Cette requête de pre-flight a pour objectif de déterminer si la demande est sûre ou non.
+Dans un premier temps, le serveur va répondre à la demande de pre-flight et indiquera si la requête est spure ou non, si c'est le cas le serveur autorisera la requête initiale, sinon elle sera bloquée.
+Implémentation de la norme CORS.
+
+### Mettre en place les CORS dans l'API REST
+
+L'implémentation des en-têtes CORS dépend du langage et du framework utilisé côté backend.
+Il existe un paquet pour implémenter directement la norme CORS DANS l'API REST.
+npm install cors --save
+
+Implémentation dans l'API REST, le paquet CORS s'utilise comme un middleware.
+La norme CORS s'applique à un ensemble d'endpoints.
+app.js
+
+On peut passer des options au middleware CORS afin d'ahuster les domaines autorisés à échanger avec l'API REST, ainsi que le type de requêtes autorisées.
+Dans notre cas on laisse les options par défaut en place:
+    {
+        "origin": "*",
+        "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+        "preflightContinue": false,
+        "optionsSucessStatus": 204
+    }
+origin et methods: qui et comment? tout le monde et la plupart des méthodes crud sont autorisées.
+Ensuite c'est le système d'authentification JWT qui prendra le relais.
+
+### Ajout d'une application JS
+
+Pour vérifier que CORS est bien en place sur notre API REST distante, on va commencer par créer une application web JS minimaliste.
+On pourra faire appel API REST depuis des frameworks comme angular.
+
+Requêtes exécutées directement au chargement de l'application.
+index.js, on utilise l'API FETCH native du nav qui permet d'effectuer des requêtes réseau sans avoir de dépendances ou de paquets à installer.
+L'API FETCH nous blige à convertir la réponse de l'PI REST au format json.
+console du nav.
+
+### Ajout d'une application Angular
+
+AngularJS: typescript, http client et programmation réaactive.
+
+
+## ECMAScript6
+
+ES6
+
+JS sytème d'héritage prototypal, fonctions anonymes, ...
+Il faut standardisé pour la robustesse des applis.
+ES6 =  dernière version standardisée de JS (juin 2015).
+Ne fonctionnent pas encore dans certains navigateurs, les dev utilisent un **transpilateur** pour convertir ES6 en ES5, ainsi le code est compris par tous les nav.
+L transpilateur permet de publier son code pour les nav qui ne supportent pas encore l'ES6, il traduit ES6 en ES5.
+
+### Les classes
+
+L'on peut utiliser des classes en JS.
+Mot clef classe:
+
+    class Vehicl {
+        constructor(color, drivingWheel) {
+            this.color = color;
+            this.drivingWheel = drivingWheel;
+            this.isEngineStart = false;
+        }
+    }
+
+    start() {
+        this.isEngineStart = true;
+    }
+
+    stop() {
+        this.isEngineStart = flase;
+    }
+C'est toujours de l'héritage par prototype qui tourne derrière.
 
 
 ## Sources
