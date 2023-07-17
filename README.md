@@ -1291,6 +1291,73 @@ Application sur findAll.
 
 Chercher un jeton valide grâce au point de terminaison de la connexion, puis on l'utilisera pour récupèrer la liste de tout les pokemons.
 
+## Ajouter une application Web Angular
+
+### Communication entre une application web et une API REST
+
+Utilisation de l'API REST sur une application distante.
+
+Back end API REST <=> Frontend
+                https
+
+=> envoi d'une requête d'authentifiaction sur le endpoint de connexion avec les bons id,
+=> récupération du jeton JWT et l'utiliser pour effectuer d'autres requêtes protégées,
+
+Si une application web se trouve sur un serveur ou poste de travail, on ne peut pas juste envoyer des requêtes HTTP à travers le réseau pour intéragir avec notre API.
+
+
+### Présentation des politiques de sécurité
+
+Communication entre front et back est soumise à des règles de sécurité.
+La route de connexion n'est pas accessible depuis l'extérieur pour le moment.
+La route de connexion est publique pourtant car pas de jeton JWT pour retourner une réponse, publique dans ce sens. Mais le problème est dû aux normes de sécurité des navigateurs.
+
+Politique de sécurité => une page web standard à tendance à charger plusieurs ressources provenant de plusieurs endroit sur le web. Si non vérifiées par le nav, la sécurité peut être menacée.
+Une de ces politiques de sécurité = **Same Origin**: une page web hébergée sur un serveur ne peut intéragir qu'avec les autres ressources de ce serveur.
+Impose donc que toutes les ressources du site se situent sur le même serveur.
+Dans cette politique, ça n'est pas le serveur qui compte, mais l'origine. Ell est composée de trois parties disctinctes:
+- le protocole (HTTP, HTTPS, ...),
+- l'hôte (nom de domaine du site),
+- numéro de port (port site web par défaut est le port 80).
+
+Il existe des politiques de sécurité qui associent les deux comme l'**origine croisée**. Elle est devenue la norme de partage de ressources entre des origines différentes = **CORS**.
+
+### Le fonctionnement des CORS
+
+Permet à l'API REST d'être accessible à certains serveurs distants tout en respectant les normes de sécurité habituelles des nav.
+
+CORS est une politique de sécurité permettant d'effectuer des requêtes en dehors de l'origine de départ.
+**Cross Origine Ressource Sharing**
+Il y a tout de même une contrainte: les demandes d'origines croisées impliquent que les serveurs doivent implémenter des moyens pour traiter les requêtes provenant d'origines extérieures.
+Il faut indiquer à l'API REST que telle ou telle application Web est bien autorisée à accèder à nos ressources depuis Heroku.
+La norme CORS permet au serveur de spécifier qui peut accèder aux ressources, mais également comment y accèder.
+
+Qui => il faut indiquer les ressources autorisées pour savoir qui peut accèder aux ressources,
+Comment => il faut spécifier les requêtes HTTP autorisées aux éléments extérieurs.
+La plupart des serveurs autoriseront les requêtes GET, ce qui signifie qu'ils permettent l'accès en lecture aux ressources d'origine externe. Cependant, les autres requêtes  peuvent être refusées pour éviter tout comportement malveillant.
+
+Comment CORS gère les demandes provenant des ressources externes.
+La norme CORS utilise des entêtes HTTP spécifiques pour fonctionner: Access-Control-Allow-Origin/ ...
+Celle qui ressort du lot est Access-Control-Allow-Origin. Lorsqu'une ressource GET est effectuée pour accèder à une ressource sur un serveur, ce dernier retournera une réponse avec une valeur pour l'entête **Access-Control-Allow-Origin**. Pour partager une ressource avec n'importe quel domaine sur Internet, on utilisera la valeur étoiles **Access-Control-Allow-Origin***.
+Mais il est également possible de spécifier une liste de domaines particuliers autorisés à accèder à la ressource du serveur en question.
+Access-Control-Allow-Origin est essentielle à la mise en place de la norme CORS et également la sécurité des ressources.
+
+### CORS et les requêtes complexes
+
+Au délà de la gestion des origines croisées, CORS propose une politique de sécurité renforcée pour toutes les requêtes qui ne sont pas en type GET.
+Cela permettra de renforcer la sécuité de l'API REST.
+Il faut distinguer les requêtes simples et les requêtes complexes:
+- requêtes simples = requêtes HTTP de types GET ou POST,
+- requêtes complexes = DELETE, UPDATE, PUT.
+
+Pour savoir ce qui est permis ou non les serveurs respectent un processus quyi vérifie d'abord l'origine du client, puis communique au nav web le type de requêtes autorisées.
+
+![CORS](img/CORS.png)
+
+Vérification de l'origine du client, puis communique au navigateur web le type de requête est autorisée.
+Dans le cas d'une requête complexe, une requête  de contrôle **pre-flight** est effectuée grâce à l'entête **options**. Cette requeête de pre-flight a pour objecti de déterminer si la demande est sûre ou non.
+
+
 ## Sources
 
 [sync](https://www.pierre-giraud.com/javascript-apprendre-coder-cours/introduction-asynchrone/)
