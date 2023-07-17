@@ -176,7 +176,7 @@ Il s'occupe d'exécuter le projet Node.js en tâche de fond, à chaque modificat
 
 #### Installation nodemon
 
-**npm install nodemon --save -dev => il existe deux types de dépendances: dépendances du projet dans dependencies, --save et dependencies du projet pendant le développement, devDependencies, comme nodemon.Une fois l'application déployée, elle n'aura pas à être relancée.**
+**npm install nodemon --save-dev => il existe deux types de dépendances: dépendances du projet dans dependencies, --save et dependencies du projet pendant le développement, devDependencies, comme nodemon.Une fois l'application déployée, elle n'aura pas à être relancée.**
 
 Il faut mettre à jour le script de démarrage: nodemon app.js.
 
@@ -1290,6 +1290,139 @@ On doit laisser en libre service le endpoint de la connexion, il existe une solu
 Application sur findAll.
 
 Chercher un jeton valide grâce au point de terminaison de la connexion, puis on l'utilisera pour récupèrer la liste de tout les pokemons.
+
+## Déploiement sur la plateforme Heroku
+
+### Le procesus de déploiement
+
+L'API REST fonctionne sur le serveur local, il faudrait la déployer sur un serveur distant.
+Le fait de passer du développement à un logiciel utilisable par des utilisateurs s'appelle le **déploiement en production**.
+Il faut déployer une BDD en ligne, ainsi qu'un serveur NodeJs et activer le mode production pour Express.
+Puis trouver une plateforme en ligne pour héberger tous les élements qui constituent notre API REST.
+
+Tâches:
+- créer le projet sur la pateforme Heroku (entreprise appartenant à la cie Salesforce qui permet d'heberger gratuitement des API REST en dessous d'un certain quotat d'usage, notamment avec une BDD mariaDB). Accès à une console d'admin, consultation de l'historique de nos déploiements,
+- préparer le projet en local avant le déploiement, exemple id d'accès à la BDD ne seront pas les mêmes en local. On utilisera le mécanisme de variables d'environnement propres à NodeJS,
+- déploiement de l'API REST complète. 
+
+### Créer un compte sur Heroku
+
+Il ya beaucoup d'éléments à heberger, un serveur web écrit en NodeJS, une API REST réalisée avec Express et une BDD.
+
+### Installer Git
+
+La phase de déploiement comporte plusieurs phases en informatique.
+Sur heroku il y a une spécificité à prendre en compte: préconise de déployer notre API REST grâce à un utilitaire nommé Heroku CLI => requiert l'installation du logiciel de versionning Git.
+cmd  heroku -v
+### Installer Heroku CLI
+
+Fonctionnalités:
+déploiement d'appli web, ou API REST, gérer la puissance de son infrastructure en fonction du nombre d'user, mettre en place une BDD, démarrer son projet en local,...
+https://devcenter.heroku.com/articles/heroku-cli#download-and-install
+
+### Se connecter 
+
+Relier l'outil au compte sur le web: heroku login
+cmd  heroku login => nav
+
+### Variables d'environnement
+
+Concept important: variables d'environnement.
+De la même manière qu'un navigateur a accès à certains objets gloabaux comm Windows, Alert, ..., NodeJS a de son côté ses propres objets globaux liés au contexte d'éxecution.
+Nav et NodeJS sont deux environnements d'exécution différents, les objets globaux disponibles sont différents également.
+On peut y accèder directement car directement injectés par NodeJS lors de l'exécution du programme.
+
+**process** => objet gloabk contient les informations à propos de l'environnement dans lequel le programme s'exécute, il possède une propriété env qui contient les variables d'environnement = NodeJS propose plusieurs objets globaux, et l'un d'entre eux permet d'accèder aux variables d'nevironnement.
+**require** => fonction que l'on utilise depuis le début afin de récupèrer un module JS dans le module courant. Objet global de NodeJS.
+**__dirname** => retourne le chemin vers le dossier courant dans lequel s'exécute notre programme.
+**module** => contient les informations générales à propos du module courant, comme l'meplacement du fichier de ce module, les méthodes exportées.
+**global** => comme windows dans le navigateur, c'est l'objet global qui représente l'environnement d'exécution NodeJS.
+
+Pour le déploiement, on passe par lm'objet global process. Nous allons afficher les variables d'environnement déjà existantes dans notre programme.
+
+test.js à la racine du projet. Sera supprimé ensuite
+
+### Les variables d'environnement en production
+
+Il va falloir déterminer en quoi cela sera utile pour le déploiement.
+En effet, elles permettent de configurer le projet en fonction des différents écosystèmes sur lequel le projet NodeJS sera exécuté. Pour le moment, développement de l'API REST en local sur le poste de travail => **environnement de déploiement** != heroku => envoironnement de production. Nous aurons donc deux environnements différents pour le même projet NodeJS. Ils sont différents et ne fonctionnent pas de la même manière.
+En local: démarrage de l' API REST  sur le port 3000, mais en production, le port à utiliser sera attribué dynamiquement par la plateforme Heroku qui a elle même ses contraintes internes d'infrastructures.
+Pour accèder à une variable d'environnement spécifique, test.js.
+
+    console.log(process.env);
+    // accès à l'ensemble des variables d'env en passant par l'objet global process. Fourni directement par NodeJs. node test.js
+    
+    console.log(process.env.PORT);
+    // Accès à une variable spécifique => undefined, la var d'env port n'est pas définie sur l'ordi. Cependant les plateformes d'hébergement comme Heroku utilisent  ette variable port pour démarrer notre serveur NodeJs en production
+
+Comment récupèrere cette valeur dynamique attribuée par Heroku, il faut donc adapter le code en fonction des deux environnements.
+
+### Démarrer l'API REST sur un port dynamique
+
+Voir dossier API anneso.
+app.js => 3000, comment connaître le port d'heroku.
+Variables d'environnement, le port spécifique déterminé par Heroku est accessible grâce à la variable d'environnement port.
+Lorsque le serveur web va démarrer sur Heroku, il va falloir écouter le numéro de port spécifié par la vr d'env process.env.PORT.
+La variable d'environnement port doit être prise en compte dans app.js.
+
+### Préparer l'API REST pour la production
+
+En local, au démarrage de l'API REST en production, Heroku, ne va pas s'occuper uniquement d'attribuer un numéro de port dynamiquement.
+En production, il y à trois points sur lesquels être attentifs:
+- plus d'usage de nodemon, grave erreur!
+- express est un outil qui offre la possibilité en production afin de rendre l'API REST beaucoup plus efficace lorsqu'elle srea utilisée par les utilisateurs, il faut le passer en mode prodution,
+- Heroku n'installe pas les dépendances de développement en production. Il faut nettoyer.
+
+Nodemon a été installé pour accèlerer nos développements, sont rôle est de démarrer et redémarrer l'API lors des modifications, mais gorumand en ressources et inutile en production. Il faut s'en débarrasser pour le déploiement mais le garder en local pour les futurs développements et améliorations => heroku va démarrer notre API REST en production: il va automatiquement exécuter la commande NPM start contenue dans le fichier package.json et donc délencher nodemon malgré nous. Il faut donc séparer deux scripts différents pour démarrer notre API REST en fonction de l'environnement sur lequel on se trouve.
+package.json voir scripts.
+En local il faudra utiliser npm run dev! npm run start pour la production.
+
+Express: il existe une nouvelle variable d'environnement qui est **node_env**. Spécifie l'environnement dans lequel l'application s'exécute, soit de production, soit de développement. Express récupère cette variable d'environnement pour savoir s'il doit fonctionner en mode production, ou non.
+La manière la plus simple d'améliorer notre API REST est de définier la variable d'environnement node_env à production.
+scripts de démarrage du packge.json.
+On va donc attribuer une valeur dynamiquement à NODE_ENV en fonction de l'environnement sur lequel on démarre l'API REST.
+
+Les dépendances de développements: Heroku ne les installe pas.
+morgan et nodemon qui ne fonctionneront plus en production.
+nodemon aucune erreur, morgan permet d'illustrer des fonctionnements des middlewares mais peu d'usage => soit le supprimer soit dépendances normales. Allégeons l'API REST.
+
+### Ajout d'un endpoint Hello! Heroku
+
+On va ajouter un endpoint à la racine de l'API REST pour vérifier que le déploiement s'est bien passé, en testantrapidement un endpoint sans lien avec la bdd.
+app.js.
+    app.get('/', (req, res) =>{
+        res.json('Hello, Heroku!');
+    });
+    // test déploiement hors BDD. Pas de fichier spé car code temporaire.
+
+### Héberger une API REST sur Heroku
+
+Comment l'envoyer?
+Heroku CLI qui prend le relais car il existe des commandes nous permettant de déployer l'API REST sur le web.
+
+1- Initialisations de l'API REST auprès de Heroku CLI et de Github, pour qu'ils aient connaissance du projet à déployer.
+cmd git init/ git add/ git commit -m <<first commit>>/ heroku create.
+
+Cela permet d ecréer un projet distant sur Heroku, prêt à accueillir le code de notre API REST.
+Dashboard OK
+Il ne reste plus qu'à pousser le code à l'adresse indiquéepar Heroku. 
+Heroku et Git sont deux outils complémentaires et qui fonctionnent en symbiose.
+
+### Déploiement  
+
+heroku git:remote -a hidden-meadow-25616
+git push heroku main
+heroku open
+
+### Corriger les erreurs en production
+
+Il manque seulement la BDD en production.
+Si message non affiché: en local déboggage plus simple, en production nous n'accédons pas aux erreurs aussi facilement.
+Commande qui affiche le terminal de commande où s'exécute notre application en production.
+On a ainsi accès aux logs et erreurs pouvant survenir sur heroku: **heroku logs --tail**, l'API foit être ouverte dans le nav et rafraîchit.
+Il faut corriger en local et redéployer avec les modifications.
+git push heroku main
+
 
 ## Sources
 
