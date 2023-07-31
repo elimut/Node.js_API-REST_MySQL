@@ -1338,7 +1338,7 @@ On peut y accèder directement car directement injectés par NodeJS lors de l'ex
 **module** => contient les informations générales à propos du module courant, comme l'meplacement du fichier de ce module, les méthodes exportées.
 **global** => comme windows dans le navigateur, c'est l'objet global qui représente l'environnement d'exécution NodeJS.
 
-Pour le déploiement, on passe par lm'objet global process. Nous allons afficher les variables d'environnement déjà existantes dans notre programme.
+Pour le déploiement, on passe par l'objet global process. Nous allons afficher les variables d'environnement déjà existantes dans notre programme.
 
 test.js à la racine du projet. Sera supprimé ensuite
 
